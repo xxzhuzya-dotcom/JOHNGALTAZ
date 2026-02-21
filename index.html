@@ -3,492 +3,1695 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JOHNGALTAZ | E-commerce Platform</title>
+    <title>JOHNGALTAZ | Официальный интернет-магазин</title>
+    
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <script>
-        tailwind.config = { theme: { extend: { colors: { brand: '#0B1416', accent: '#F85C58', base: '#F6F6F3', neutral: '#D6D6D6', graytext: '#666666' }, fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } }
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: '#0B1416',       // Primary: Текст, основные заголовки, иконки
+                        accent: '#F85C58',      // Accent: CTA-кнопки, активные элементы
+                        base: '#F6F6F3',        // Background: Фон сайта и карточек
+                        neutral: '#D6D6D6',     // Neutral: Бордеры, disabled
+                        graytext: '#666666'     // Вторичные тексты
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif']
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(11, 20, 22, 0.05)',
+                        'glow': '0 0 20px rgba(248, 92, 88, 0.4)',
+                    }
+                }
+            }
+        }
     </script>
+    
     <style>
-        body { background-color: #F6F6F3; color: #0B1416; overflow-x: hidden; }
-        .card-t { transition: all 0.2s ease; } .card-t:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(11,20,22,0.1); }
-        .diff-hl { background-color: #fef08a; } 
-        .mega-menu { border-bottom: 2px solid #F85C58; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .vis-cat { border: 1px solid transparent; transition: all 0.3s ease; }
-        .vis-cat:hover { border-color: #F85C58; background-color: rgba(248,92,88,0.05); }
-        ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-thumb { background: #D6D6D6; border-radius: 4px; }
+        body { 
+            background-color: #F6F6F3; 
+            color: #0B1416; 
+            overflow-x: hidden; 
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* Modern Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #F6F6F3; }
+        ::-webkit-scrollbar-thumb { background: #D6D6D6; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #666666; }
+
+        /* Smooth page transitions */
+        .fade-in { 
+            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+        }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(15px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        /* Card Hover Effects */
+        .modern-card {
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border: 1px solid transparent;
+        }
+        .modern-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px -5px rgba(11, 20, 22, 0.1);
+            border-color: rgba(214, 214, 214, 0.5);
+        }
+
+        /* Comparison Table Highlight */
+        .diff-hl { 
+            background-color: rgba(248, 92, 88, 0.08); 
+            border-left: 3px solid #F85C58;
+        }
+
+        /* Mega Menu Styling */
+        .mega-menu {
+            border-bottom: 3px solid #F85C58;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+        
+        .cat-visual-card {
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .cat-visual-card:hover {
+            border-color: #F85C58;
+            background-color: rgba(248, 92, 88, 0.05);
+            box-shadow: inset 0 0 20px rgba(248, 92, 88, 0.1);
+        }
+
+        /* Hide number arrows in input */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useMemo } = React;
+        const { useState, useEffect, useMemo, useRef } = React;
 
-        // --- 1. MOCK DATA GENERATION (Расширение до 50 товаров) ---
-        const baseProducts = [
-            { id: 1, sku: "THZ24", name: "THUNDEROBOT Zero 2024", cat: "Игровые ноутбуки", brand: "Thunderobot", price: 950000, oldPrice: 1050000, stock: "В наличии", specs: { "CPU": "i9-13900HX", "GPU": "RTX 4070", "RAM": "32GB", "SSD": "1TB", "Экран": "16' 240Hz", "Частота": "240Hz", "Вес": "2.5 кг" }, imgs: ["https://images.unsplash.com/photo-1603302576837-37561b2e2302?auto=format&fit=crop&q=80&w=400"], variants: { ram: [{l:"32GB", d:0}, {l:"64GB", d:80000}], ssd: [{l:"1TB", d:0}, {l:"2TB", d:45000}] }, desc: { forWhom: "Для хардкорных геймеров и 3D-дизайнеров.", pros: "Топовое охлаждение, 240Hz.", box: "Ноутбук, ЗУ 300W." }, cross: [3], pop: 100, new: true },
-            { id: 2, sku: "TH911X", name: "Thunderobot 911X", cat: "Игровые ноутбуки", brand: "Thunderobot", price: 520000, stock: "Предзаказ", deliveryText: "Поставка до Алматы ~ 8 дней", specs: { "CPU": "i5-12450H", "GPU": "RTX 3050", "RAM": "16GB", "SSD": "512GB", "Экран": "15.6' 144Hz" }, imgs: ["https://images.unsplash.com/photo-1593640408182-31c70c8268f5?auto=format&fit=crop&q=80&w=400"], variants: { ram: [{l:"16GB", d:0}, {l:"32GB", d:40000}], ssd: [{l:"512GB", d:0}, {l:"1TB", d:25000}] }, desc: { forWhom: "Для начинающих геймеров.", pros: "Оптимальное соотношение цена/качество.", box: "Ноутбук, ЗУ 150W." }, cross: [3], pop: 80, new: false },
-            { id: 3, sku: "ML903", name: "Мышь ML903 PRO", cat: "Периферия", brand: "Thunderobot", price: 35000, stock: "В наличии", specs: { "Сенсор": "PAW3395", "Вес": "65г", "DPI": "26000" }, imgs: ["https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&q=80&w=400"], pop: 150, new: true },
-            { id: 4, sku: "SMAS-UX", name: "Аппарат SMAS UltraX", cat: "Медицинское оборудование", brand: "MedTech", price: 0, priceText: "По запросу", stock: "Под заказ", specs: { "Рег. уд.": "РК-МТ-001", "Ресурс": "20 000 линий" }, imgs: ["https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&q=80&w=400"], isB2B: true, warning: "КРИТИЧНО: Требуется медицинская лицензия и профильное образование специалиста. Имеются противопоказания.", docs: ["РУ_МЗ_РК.pdf", "Сертификат_СМК.pdf", "Инструкция.pdf"], pop: 20, new: false },
-            { id: 5, sku: "LAS-CP", name: "Лазер CosmePro", cat: "Косметическое оборудование", brand: "CosmePro", price: 2500000, stock: "Предзаказ", deliveryText: "Поставка ~ 14 дней", specs: { "Мощность": "1200W", "Охлаждение": "Сапфировое" }, imgs: ["https://images.unsplash.com/photo-1590424693955-f7035eb4e622?auto=format&fit=crop&q=80&w=400"], isB2B: true, pop: 40, new: true },
-            { id: 6, sku: "CM-BP", name: "Кофемашина Barista Pro", cat: "Мелко-бытовая техника", brand: "HomeTech", price: 180000, stock: "В наличии", specs: { "Тип": "Рожковая", "Давление": "15 бар" }, imgs: ["https://images.unsplash.com/photo-1517246286411-8bb31bf32f22?auto=format&fit=crop&q=80&w=400"], pop: 60, new: false }
+        // ==========================================
+        // 1. DATA GENERATION & MOCK DATABASE
+        // ==========================================
+        
+        // Категории для Мега-меню и фильтров
+        const CATEGORIES = [
+            { id: "Игровые ноутбуки", sub: "Мощные решения", imgId: 1 },
+            { id: "Периферия", sub: "Мыши, клавиатуры", imgId: 2 },
+            { id: "Косметическое оборудование", sub: "Для салонов красоты", imgId: 3 },
+            { id: "Медицинское оборудование", sub: "Спец. оборудование", imgId: 4 },
+            { id: "Мелко-бытовая техника", sub: "Для дома и офиса", imgId: 5 }
         ];
 
-        // Генерируем еще 44 товара для достижения 50 (Пункт "Расширь каталог до 50 товаров")
-        const generatedProducts = Array.from({ length: 44 }).map((_, i) => {
-            const isLaptop = i % 2 === 0;
-            return {
-                id: 7 + i,
-                sku: `GEN-${7+i}`,
-                name: isLaptop ? `Ноутбук Thunderobot ${i+100} Series` : `Игровой монитор TR-${i}X`,
-                cat: isLaptop ? "Игровые ноутбуки" : "Периферия",
-                brand: "Thunderobot",
-                price: 250000 + (i * 15000),
-                stock: i % 4 === 0 ? "Предзаказ" : "В наличии",
-                deliveryText: i % 4 === 0 ? "Поставка до Алматы ~ 8 дней" : "",
-                specs: isLaptop ? { "CPU": i%2===0?"i7-12700H":"Ryzen 7", "GPU": "RTX 3060", "RAM": "16GB", "SSD": "512GB" } : { "Диагональ": "27'", "Частота": "165Hz", "Матрица": "IPS" },
-                imgs: [isLaptop ? "https://images.unsplash.com/photo-1593640408182-31c70c8268f5?auto=format&fit=crop&q=80&w=400" : "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&q=80&w=400"],
-                pop: Math.floor(Math.random() * 50),
-                new: i % 5 === 0
-            };
-        });
+        // Вспомогательная функция для создания массива из 50 товаров
+        const generateProducts = () => {
+            const products = [];
+            
+            // Ручное определение 6-ти флагманских товаров для демонстрации всех сложных сценариев ТЗ
+            const flagships = [
+                { 
+                    id: 1, sku: "THZ-24-PRO", name: "THUNDEROBOT Zero 2024 Ultimate", cat: "Игровые ноутбуки", brand: "Thunderobot", 
+                    price: 950000, oldPrice: 1050000, stock: "В наличии", 
+                    specs: { "CPU": "i9-13900HX", "GPU": "RTX 4070", "RAM": "32GB", "SSD": "1TB", "Экран": "16' 240Hz", "Матрица": "IPS", "ОС": "Windows 11 Pro", "Вес": "2.5 кг" }, 
+                    imgs: ["images/tovar1.jpg", "images/tovar2.jpg"], 
+                    variants: { 
+                        ram: [{l:"32GB", d:0}, {l:"64GB", d:80000}], 
+                        ssd: [{l:"1TB", d:0}, {l:"2TB", d:45000}] 
+                    }, 
+                    desc: { forWhom: "Для хардкорных киберспортсменов и 3D-дизайнеров, требующих максимум производительности.", pros: "Топовая система охлаждения Wind-O, экран с частотой 240Hz для плавной картинки.", box: "Ноутбук, блок питания 300W, документация, гарантийный талон." }, 
+                    cross: [3, 15, 22], pop: 500, new: true 
+                },
+                { 
+                    id: 2, sku: "TH911X-BASE", name: "Thunderobot 911X", cat: "Игровые ноутбуки", brand: "Thunderobot", 
+                    price: 520000, stock: "Предзаказ", deliveryText: "Поставка до Алматы ~ 8 дней", 
+                    specs: { "CPU": "i5-12450H", "GPU": "RTX 3050", "RAM": "16GB", "SSD": "512GB", "Экран": "15.6' 144Hz" }, 
+                    imgs: ["images/tovar3.jpg"], 
+                    variants: { 
+                        ram: [{l:"16GB", d:0}, {l:"32GB", d:40000}], 
+                        ssd: [{l:"512GB", d:0}, {l:"1TB", d:25000}] 
+                    }, 
+                    desc: { forWhom: "Отличный выбор для начинающих геймеров и студентов.", pros: "Идеальное соотношение цена/производительность. Стильный дизайн.", box: "Ноутбук, зарядное устройство 150W." }, 
+                    cross: [3, 22], pop: 450, new: false 
+                },
+                { 
+                    id: 3, sku: "PER-ML903", name: "Беспроводная мышь ML903 PRO", cat: "Периферия", brand: "Thunderobot", 
+                    price: 35000, stock: "В наличии", 
+                    specs: { "Сенсор": "PAW3395", "Вес": "65г", "DPI": "26000", "Подключение": "2.4GHz + Bluetooth" }, 
+                    imgs: ["images/tovar4.jpg"], 
+                    pop: 300, new: true 
+                },
+                { 
+                    id: 4, sku: "MED-SMAS-UX", name: "Аппарат SMAS-лифтинга UltraX", cat: "Медицинское оборудование", brand: "MedTech", 
+                    price: 0, priceText: "По запросу", stock: "Под заказ", deliveryText: "Срок поставки 20-30 дней",
+                    specs: { "Тип воздействия": "HIFU (SMAS)", "Рег. удостоверение": "РК-МТ-001234", "Ресурс картриджа": "20 000 линий", "Дисплей": "15 дюймов Touch" }, 
+                    imgs: ["images/tovar5.jpg"], 
+                    isB2B: true, 
+                    warning: "КРИТИЧНО: Приобретение и использование аппарата допускается только при наличии медицинской лицензии у клиники и профильного образования у врача-косметолога. Имеются противопоказания, требуется консультация.", 
+                    docs: ["Регистрационное_удостоверение_МЗ_РК.pdf", "Сертификат_СМК_ISO.pdf", "Инструкция_по_эксплуатации.pdf"], 
+                    pop: 150, new: false 
+                },
+                { 
+                    id: 5, sku: "COS-LASER-CP", name: "Диодный лазер CosmePro 1200W", cat: "Косметическое оборудование", brand: "CosmePro", 
+                    price: 2500000, stock: "Предзаказ", deliveryText: "Поставка ~ 14 дней", 
+                    specs: { "Мощность излучателя": "1200W", "Охлаждение": "Сапфировое до -10°C", "Ресурс вспышек": "20 млн", "Длина волны": "808 нм" }, 
+                    imgs: ["images/tovar6.jpg"], 
+                    isB2B: true, 
+                    pop: 200, new: true 
+                },
+                { 
+                    id: 6, sku: "HOME-CM-BP", name: "Кофемашина Barista Pro", cat: "Мелко-бытовая техника", brand: "HomeTech", 
+                    price: 180000, oldPrice: 220000, stock: "В наличии", 
+                    specs: { "Тип": "Рожковая полуавтомат", "Давление помпы": "15 бар", "Капучинатор": "Ручной (панарелло)", "Материал": "Нержавеющая сталь" }, 
+                    imgs: ["images/tovar7.jpg"], 
+                    pop: 250, new: false 
+                }
+            ];
 
-        const DB = [...baseProducts, ...generatedProducts];
+            products.push(...flagships);
 
-        const CATS = [
-            { id: "Игровые ноутбуки", img: "https://images.unsplash.com/photo-1603302576837-37561b2e2302?auto=format&fit=crop&q=80&w=300", sub: "Мощные решения" },
-            { id: "Периферия", img: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&q=80&w=300", sub: "Мыши, мониторы" },
-            { id: "Косметическое оборудование", img: "https://images.unsplash.com/photo-1590424693955-f7035eb4e622?auto=format&fit=crop&q=80&w=300", sub: "Салонам красоты" },
-            { id: "Медицинское оборудование", img: "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&q=80&w=300", sub: "С лицензией" },
-            { id: "Мелко-бытовая техника", img: "https://images.unsplash.com/photo-1517246286411-8bb31bf32f22?auto=format&fit=crop&q=80&w=300", sub: "Для дома и офиса" }
-        ];
+            // Генерация оставшихся 44 товаров для достижения лимита в 50
+            const brands = ["Thunderobot", "Logitech", "Razer", "MedTech", "CosmePro", "HomeTech", "Samsung", "LG"];
+            const cpus = ["i5-12450H", "i7-12700H", "i9-13900HX", "Ryzen 5 5600H", "Ryzen 7 6800H", "Ryzen 9 7945HX"];
+            const gpus = ["RTX 3050", "RTX 3060", "RTX 4050", "RTX 4060", "RTX 4070", "RTX 4080", "RTX 4090"];
+            const rams = ["8GB", "16GB", "32GB", "64GB"];
+            const ssds = ["512GB", "1TB", "2TB"];
 
-        // --- 2. UI COMPONENTS ---
-        const Btn = ({ children, v='pri', cls='', ...p }) => {
-            const s = { pri: "bg-accent text-white hover:brightness-110 shadow-sm", sec: "border-2 border-brand text-brand hover:bg-brand hover:text-white", out: "border border-neutral text-brand hover:bg-neutral/30", ghost: "text-graytext hover:text-brand" };
-            return <button className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${s[v]} ${cls}`} {...p}>{children}</button>;
+            for (let i = 7; i <= 50; i++) {
+                // Распределяем товары по категориям
+                let cat, name, specs, isB2B = false;
+                
+                if (i % 5 === 0) {
+                    cat = "Периферия";
+                    name = `Игровая клавиатура Series X${i}`;
+                    specs = { "Тип": "Механическая", "Свитчи": "Red Linear", "Подсветка": "RGB" };
+                } else if (i % 7 === 0) {
+                    cat = "Медицинское оборудование";
+                    name = `УЗИ Аппарат экспертного класса M${i}`;
+                    specs = { "Датчики": "Конвексный, Линейный", "Экран": "21 дюйм" };
+                    isB2B = true;
+                } else if (i % 11 === 0) {
+                    cat = "Мелко-бытовая техника";
+                    name = `Умный робот-пылесос CleanBot v${i}`;
+                    specs = { "Мощность всасывания": "4000 Па", "Навигация": "LIDAR" };
+                } else {
+                    cat = "Игровые ноутбуки";
+                    name = `Ноутбук Gaming Pro G${i}`;
+                    specs = {
+                        "CPU": cpus[i % cpus.length],
+                        "GPU": gpus[i % gpus.length],
+                        "RAM": rams[i % rams.length],
+                        "SSD": ssds[i % ssds.length],
+                        "Экран": "15.6' 165Hz"
+                    };
+                }
+
+                const brand = brands[i % brands.length];
+                const price = isB2B ? (1000000 + (i * 50000)) : (50000 + (i * 15000));
+                
+                products.push({
+                    id: i,
+                    sku: `GEN-SKU-${i}`,
+                    name: name,
+                    cat: cat,
+                    brand: brand,
+                    price: price,
+                    oldPrice: i % 6 === 0 ? price + 50000 : null,
+                    stock: i % 3 === 0 ? "Предзаказ" : "В наличии",
+                    deliveryText: i % 3 === 0 ? "Поставка до Алматы ~ 8 дней" : "",
+                    specs: specs,
+                    imgs: [`images/tovar${i}.jpg`], // Указываем локальные картинки от 1 до 50
+                    isB2B: isB2B,
+                    pop: Math.floor(Math.random() * 100),
+                    new: i % 4 === 0
+                });
+            }
+
+            return products;
         };
 
-        const App = () => {
-            const [view, setView] = useState('home');
-            const [hist, setHist] = useState(['home']);
-            const [activeP, setActiveP] = useState(null);
-            
-            const [cart, setCart] = useState([]);
-            const [comp, setComp] = useState([]);
-            const [favs, setFavs] = useState([]);
-            const [modal, setModal] = useState(null);
-            const [search, setSearch] = useState('');
-            const [menu, setMenu] = useState(false);
+        const DB = generateProducts();
 
-            // Filters State
-            const [catF, setCatF] = useState('Все');
-            const [brandF, setBrandF] = useState('');
-            const [sort, setSort] = useState('pop');
-            const [priceR, setPriceR] = useState(3000000);
-            const [inStock, setInStock] = useState(false);
+        // ==========================================
+        // 2. REUSABLE UI COMPONENTS
+        // ==========================================
+
+        /**
+         * Компонент безопасного отображения изображения.
+         * Если локальной картинки images/tovarX.jpg нет, покажет красивую заглушку с названием.
+         */
+        const SafeImage = ({ src, alt, className }) => {
+            const [hasError, setHasError] = useState(false);
+            
+            // Если ошибка загрузки, рендерим заглушку
+            if (hasError) {
+                return (
+                    <div className={`flex flex-col items-center justify-center bg-neutral/20 text-graytext ${className}`}>
+                        <i data-lucide="image-off" className="w-10 h-10 mb-2 opacity-50"></i>
+                        <span className="text-xs px-4 text-center">Нет фото ({alt})</span>
+                    </div>
+                );
+            }
+
+            return (
+                <img 
+                    src={src} 
+                    alt={alt} 
+                    className={className} 
+                    onError={() => setHasError(true)} 
+                />
+            );
+        };
+
+        /**
+         * Улучшенная кнопка с современным дизайном и микроанимациями
+         */
+        const Button = ({ children, variant = 'primary', className = '', onClick, type = "button", disabled = false, title }) => {
+            const baseStyle = "px-6 py-3 rounded-xl font-bold transition-all duration-300 ease-out flex items-center justify-center gap-2 transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100";
+            
+            const variants = {
+                primary: "bg-accent text-white shadow-lg shadow-accent/30 hover:shadow-xl hover:shadow-accent/40 hover:-translate-y-0.5",
+                secondary: "border-2 border-brand text-brand hover:bg-brand hover:text-white shadow-sm hover:shadow-md hover:-translate-y-0.5",
+                outline: "border border-neutral text-brand hover:bg-neutral/40 hover:border-graytext",
+                ghost: "text-graytext hover:text-brand bg-transparent hover:bg-neutral/20",
+                danger: "bg-red-50 text-red-600 hover:bg-red-100 border border-red-200"
+            };
+
+            return (
+                <button 
+                    type={type} 
+                    className={`${baseStyle} ${variants[variant]} ${className}`} 
+                    onClick={onClick}
+                    disabled={disabled}
+                    title={title}
+                >
+                    {children}
+                </button>
+            );
+        };
+
+        const InputField = ({ label, required, ...props }) => (
+            <div className="flex flex-col gap-1.5 w-full">
+                {label && (
+                    <label className="text-xs font-bold text-graytext uppercase tracking-wider">
+                        {label} {required && <span className="text-accent">*</span>}
+                    </label>
+                )}
+                <input 
+                    required={required}
+                    className="w-full p-3.5 bg-white border border-neutral rounded-xl focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all shadow-sm" 
+                    {...props} 
+                />
+            </div>
+        );
+
+        const SelectField = ({ label, required, options, ...props }) => (
+            <div className="flex flex-col gap-1.5 w-full">
+                {label && (
+                    <label className="text-xs font-bold text-graytext uppercase tracking-wider">
+                        {label} {required && <span className="text-accent">*</span>}
+                    </label>
+                )}
+                <select 
+                    required={required}
+                    className="w-full p-3.5 bg-white border border-neutral rounded-xl focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all shadow-sm appearance-none cursor-pointer" 
+                    {...props}
+                >
+                    {options.map((opt, i) => (
+                        <option key={i} value={opt.value || opt}>{opt.label || opt}</option>
+                    ))}
+                </select>
+            </div>
+        );
+
+        // ==========================================
+        // 3. MAIN APPLICATION & STATE ROUTER
+        // ==========================================
+
+        const App = () => {
+            // Navigation State
+            const [view, setView] = useState('home');
+            const [history, setHistory] = useState(['home']);
+            const [activeProduct, setActiveProduct] = useState(null);
+            
+            // Global E-commerce State
+            const [cart, setCart] = useState([]);
+            const [compare, setCompare] = useState([]);
+            const [favorites, setFavorites] = useState([]);
+            
+            // UI State
+            const [modal, setModal] = useState(null);
+            const [globalSearch, setGlobalSearch] = useState('');
+            const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+            const [toastMsg, setToastMsg] = useState(null);
+
+            // Filter State (For Catalog)
+            const [fCategory, setFCategory] = useState('Все');
+            const [fBrand, setFBrand] = useState('');
+            const [fSort, setFSort] = useState('pop');
+            const [fPrice, setFPrice] = useState(3000000);
+            const [fInStock, setFInStock] = useState(false);
+            
+            // Specific Laptop Filters
             const [fCpu, setFCpu] = useState('');
             const [fGpu, setFGpu] = useState('');
             const [fRam, setFRam] = useState('');
             const [fSsd, setFSsd] = useState('');
 
-            const fmtP = p => p===0 ? "По запросу" : new Intl.NumberFormat('ru-KZ').format(p) + ' ₸';
+            // Utils
+            const formatPrice = p => p === 0 ? "По запросу" : new Intl.NumberFormat('ru-KZ').format(p) + ' ₸';
             
-            const nav = (v, data=null) => { window.scrollTo(0,0); if(data) setActiveP(data); setHist(h=>[...h, v]); setView(v); setMenu(false); };
-            const goBack = () => { if(hist.length>1) { const nh=[...hist]; nh.pop(); setHist(nh); setView(nh[nh.length-1]); } else nav('home'); };
-            
-            const toCart = (p, qty=1, vStr="", fPrice=p.price) => { setCart([...cart, {...p, qty, finalP: fPrice, variant: vStr}]); alert('Товар добавлен в корзину'); };
-            const toggleFav = (p) => setFavs(pr => pr.find(x=>x.id===p.id) ? pr.filter(x=>x.id!==p.id) : [...pr, p]);
-            const toggleComp = (p) => setComp(pr => { if(pr.find(x=>x.id===p.id)) return pr.filter(x=>x.id!==p.id); if(pr.length>=4) { alert('Сравнение: максимум 4 товара'); return pr; } return [...pr, p]; });
+            const showToast = (msg) => {
+                setToastMsg(msg);
+                setTimeout(() => setToastMsg(null), 3000);
+            };
 
+            const navigate = (newView, data = null) => { 
+                window.scrollTo({ top: 0, behavior: 'smooth' }); 
+                if (data) setActiveProduct(data); 
+                setHistory(prev => [...prev, newView]); 
+                setView(newView); 
+                setMobileMenuOpen(false); 
+            };
+            
+            const goBack = () => { 
+                if (history.length > 1) { 
+                    const newHist = [...history]; 
+                    newHist.pop(); 
+                    setHistory(newHist); 
+                    setView(newHist[newHist.length - 1]); 
+                } else { 
+                    navigate('home'); 
+                } 
+            };
+            
+            // Cart Actions
+            const addToCart = (product, qty = 1, variantStr = "", finalPrice = product.price) => { 
+                // Создаем уникальный ID для товара в корзине с учетом выбранной конфигурации
+                const cartItemId = `${product.id}-${variantStr}`;
+                
+                setCart(prev => {
+                    const existing = prev.find(item => item.cartItemId === cartItemId);
+                    if (existing) {
+                        return prev.map(item => item.cartItemId === cartItemId ? { ...item, qty: item.qty + qty } : item);
+                    }
+                    return [...prev, { ...product, cartItemId, qty, finalPrice, variantStr }];
+                });
+                showToast(`Товар "${product.name}" добавлен в корзине`); 
+            };
+
+            const toggleFavorite = (product) => {
+                setFavorites(prev => {
+                    const exists = prev.find(x => x.id === product.id);
+                    if (exists) {
+                        showToast('Удалено из избранного');
+                        return prev.filter(x => x.id !== product.id);
+                    } else {
+                        showToast('Добавлено в избранное');
+                        return [...prev, product];
+                    }
+                });
+            };
+
+            const toggleCompare = (product) => { 
+                setCompare(prev => { 
+                    if (prev.find(x => x.id === product.id)) {
+                        return prev.filter(x => x.id !== product.id);
+                    }
+                    if (prev.length >= 4) { 
+                        alert('Для сравнения можно выбрать максимум 4 товара. Удалите один из текущих.'); 
+                        return prev; 
+                    } 
+                    showToast('Добавлено к сравнению');
+                    return [...prev, product]; 
+                }); 
+            };
+
+            // Инициализация иконок Lucide после каждого рендера
             useEffect(() => { lucide.createIcons(); });
 
-            // --- HEADER ---
+            // ==========================================
+            // LAYOUT COMPONENTS
+            // ==========================================
+
+            const TopBar = () => (
+                <div className="mb-6">
+                    {view !== 'home' && (
+                        <Button variant="ghost" className="px-3 py-2 text-sm" onClick={goBack}>
+                            <i data-lucide="arrow-left" className="w-4 h-4"></i> Назад
+                        </Button>
+                    )}
+                </div>
+            );
+
+            // HEADER (Сложное Мега-меню)
             const Header = () => (
-                <header className="bg-[#070D0E] text-white sticky top-0 z-50">
-                    <div className="border-b border-graytext/20 text-[11px] hidden md:block">
-                        <div className="max-w-7xl mx-auto px-4 py-2 flex justify-between text-neutral">
-                            <div className="flex gap-4"><span className="text-accent"><i data-lucide="map-pin" className="w-3 h-3 inline"></i> Казахстан</span><span><i data-lucide="truck" className="w-3 h-3 inline"></i> СДЭК, Казпочта, Boxberry, Курьер</span></div>
-                            <div className="flex gap-4"><button onClick={()=>nav('info')} className="hover:text-white">Гарантия и возврат</button><button onClick={()=>nav('b2b')} className="hover:text-white">Юр. Лицам</button><span>8 800 123 45 67</span></div>
+                <header className="bg-brand text-white sticky top-0 z-50">
+                    {/* Верхняя тонкая полоса */}
+                    <div className="border-b border-graytext/20 text-[11px] hidden md:block bg-[#070D0E]">
+                        <div className="max-w-7xl mx-auto px-4 py-2 flex justify-between text-neutral font-medium tracking-wide">
+                            <div className="flex gap-6">
+                                <span className="flex items-center gap-1.5 hover:text-white cursor-pointer transition-colors"><i data-lucide="map-pin" className="w-3.5 h-3.5 text-accent"></i> Ваш город: Алматы</span>
+                                <span className="flex items-center gap-1.5"><i data-lucide="truck" className="w-3.5 h-3.5 text-accent"></i> СДЭК, Казпочта, Boxberry, Курьер</span>
+                            </div>
+                            <div className="flex gap-6">
+                                <button onClick={()=>navigate('info')} className="hover:text-accent transition-colors">Гарантия и возврат</button>
+                                <button onClick={()=>navigate('b2b')} className="hover:text-accent transition-colors text-accent">Юр. Лицам (B2B)</button>
+                                <span className="font-bold flex items-center gap-1.5"><i data-lucide="phone" className="w-3.5 h-3.5"></i> 8 800 123 45 67</span>
+                            </div>
                         </div>
                     </div>
                     
-                    <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center gap-6">
+                    {/* Основная панель навигации */}
+                    <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center gap-6">
+                        
+                        {/* Логотип и Мобильное меню */}
                         <div className="flex items-center gap-4">
-                            <button className="md:hidden" onClick={()=>setMenu(!menu)}><i data-lucide="menu"></i></button>
-                            <div className="text-xl md:text-2xl font-bold cursor-pointer tracking-widest uppercase flex items-center gap-2" onClick={()=>nav('home')}>JOHNGALTAZ</div>
+                            <button className="lg:hidden p-2 hover:bg-white/10 rounded-lg transition-colors" onClick={()=>setMobileMenuOpen(!mobileMenuOpen)}>
+                                <i data-lucide={mobileMenuOpen ? "x" : "menu"} className="w-6 h-6"></i>
+                            </button>
+                            <div className="text-2xl font-black cursor-pointer tracking-widest uppercase flex items-center gap-2" onClick={()=>navigate('home')}>
+                                <div className="w-8 h-8 bg-accent text-white flex items-center justify-center rounded-lg">
+                                    <i data-lucide="cpu" className="w-5 h-5"></i>
+                                </div>
+                                JOHNGALTAZ
+                            </div>
                         </div>
                         
+                        {/* Десктопное меню с Мега-меню */}
                         <nav className="hidden lg:flex gap-8 text-xs font-bold items-center h-full uppercase tracking-wider">
-                            <button className="hover:text-accent transition-colors" onClick={()=>nav('home')}>Главная</button>
-                            <div className="group py-4 relative">
-                                <button className="hover:text-accent transition-colors flex items-center gap-1" onClick={()=>{setCatF('Все'); nav('catalog');}}>Каталог <i data-lucide="chevron-down" className="w-3 h-3"></i></button>
-                                <div className="absolute top-[50px] -left-32 w-[950px] bg-[#0B1416] mega-menu opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 p-6 z-50 rounded-b-xl">
-                                    <div className="grid grid-cols-5 gap-4">
-                                        {CATS.map(c => (
-                                            <div key={c.id} onClick={()=>{setCatF(c.id); nav('catalog');}} className="bg-[#111A1C] rounded-xl p-4 cursor-pointer vis-cat flex flex-col items-center text-center">
-                                                <img src={c.img} className="h-24 w-auto object-cover mb-4 mix-blend-screen drop-shadow-2xl" />
-                                                <span className="text-accent text-[9px] mb-1">{c.sub}</span>
-                                                <span className="font-bold text-xs">{c.id}</span>
+                            <button className="hover:text-accent transition-colors" onClick={()=>navigate('home')}>Главная</button>
+                            
+                            {/* Mega Menu Dropdown Wrapper */}
+                            <div className="group py-6 relative">
+                                <button className="hover:text-accent transition-colors flex items-center gap-1.5" onClick={()=>{setFCategory('Все'); navigate('catalog');}}>
+                                    Каталог <i data-lucide="chevron-down" className="w-4 h-4 transition-transform group-hover:rotate-180"></i>
+                                </button>
+                                
+                                {/* Mega Menu Content */}
+                                <div className="absolute top-[70px] -left-[300px] w-[1000px] bg-[#0B1416] mega-menu opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 p-8 z-50 rounded-b-2xl">
+                                    <div className="flex justify-between items-center mb-6 pb-4 border-b border-graytext/20">
+                                        <h3 className="text-xl font-bold">Оборудование</h3>
+                                        <button className="text-accent text-sm hover:underline" onClick={()=>{setFCategory('Все'); navigate('catalog');}}>Смотреть все товары →</button>
+                                    </div>
+                                    <div className="grid grid-cols-5 gap-6">
+                                        {CATEGORIES.map((c, idx) => (
+                                            <div key={idx} onClick={()=>{setFCategory(c.id); navigate('catalog');}} className="bg-[#111A1C] rounded-2xl p-5 cursor-pointer cat-visual-card flex flex-col items-center text-center">
+                                                {/* Имитация изображений категорий локальными картинками */}
+                                                <div className="h-28 flex items-center justify-center mb-4 mix-blend-screen drop-shadow-2xl">
+                                                    <SafeImage src={`images/tovar${c.imgId}.jpg`} alt={c.id} className="max-h-full max-w-full object-contain rounded-lg" />
+                                                </div>
+                                                <span className="text-accent text-[10px] mb-1.5 uppercase font-bold tracking-widest">{c.sub}</span>
+                                                <span className="font-bold text-sm leading-tight">{c.id}</span>
                                             </div>
                                         ))}
                                     </div>
                                 </div>
                             </div>
-                            <button className="hover:text-accent" onClick={()=>nav('info')}>Информация</button>
-                            <button className="hover:text-accent text-accent" onClick={()=>nav('b2b')}>B2B Отдел</button>
+                            
+                            <button className="hover:text-accent transition-colors" onClick={()=>navigate('info')}>Информация</button>
+                            <button className="hover:text-accent transition-colors text-accent border border-accent/30 px-3 py-1.5 rounded-lg bg-accent/10" onClick={()=>navigate('b2b')}>B2B Отдел</button>
                         </nav>
 
-                        <div className="flex-1 max-w-xs hidden md:block relative">
-                            <input type="text" placeholder="Поиск (напр: RTX 4070)..." value={search} onChange={e=>{setSearch(e.target.value); if(view!=='catalog') nav('catalog');}} className="w-full bg-[#111A1C] border border-graytext/30 rounded-full px-4 py-1.5 outline-none focus:border-accent text-sm text-white" />
-                            <i data-lucide="search" className="absolute right-3 top-2 w-4 h-4 text-graytext"></i>
+                        {/* Поиск */}
+                        <div className="flex-1 max-w-sm hidden md:block relative group">
+                            <input 
+                                type="text" 
+                                placeholder="Поиск (напр: RTX 4070)..." 
+                                value={globalSearch} 
+                                onChange={e=>{
+                                    setGlobalSearch(e.target.value); 
+                                    setSearch(e.target.value); // Синхронизируем с фильтром каталога
+                                    if(view !== 'catalog') navigate('catalog');
+                                }} 
+                                className="w-full bg-[#1A2528] border border-transparent rounded-full pl-5 pr-10 py-2.5 outline-none focus:border-accent focus:bg-white focus:text-brand text-sm text-white transition-all shadow-inner" 
+                            />
+                            <i data-lucide="search" className="absolute right-4 top-3 w-4 h-4 text-graytext group-focus-within:text-accent transition-colors"></i>
                         </div>
 
-                        <div className="flex gap-5">
-                            <button onClick={()=>nav('wishlist')} className="relative hover:text-accent" title="Избранное"><i data-lucide="heart" className="w-5 h-5"></i>{favs.length>0 && <span className="absolute -top-1.5 -right-2 bg-accent text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">{favs.length}</span>}</button>
-                            <button onClick={()=>nav('compare')} className="relative hover:text-accent" title="Сравнение"><i data-lucide="bar-chart-2" className="w-5 h-5"></i>{comp.length>0 && <span className="absolute -top-1.5 -right-2 bg-accent text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">{comp.length}</span>}</button>
-                            <button onClick={()=>nav('cart')} className="relative hover:text-accent" title="Корзина"><i data-lucide="shopping-cart" className="w-5 h-5"></i>{cart.length>0 && <span className="absolute -top-1.5 -right-2 bg-accent text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">{cart.reduce((a,c)=>a+c.qty,0)}</span>}</button>
+                        {/* Пользовательские действия */}
+                        <div className="flex gap-2">
+                            <button onClick={()=>navigate('wishlist')} className="relative p-2.5 hover:bg-white/10 rounded-full transition-colors" title="Избранное">
+                                <i data-lucide="heart" className="w-5 h-5"></i>
+                                {favorites.length > 0 && <span className="absolute top-1 right-1 bg-accent text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold shadow-sm">{favorites.length}</span>}
+                            </button>
+                            <button onClick={()=>navigate('compare')} className="relative p-2.5 hover:bg-white/10 rounded-full transition-colors" title="Сравнение моделей">
+                                {/* Иконка сравнения обновлена по просьбе пользователя */}
+                                <i data-lucide="arrow-left-right" className="w-5 h-5"></i>
+                                {compare.length > 0 && <span className="absolute top-1 right-1 bg-accent text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold shadow-sm">{compare.length}</span>}
+                            </button>
+                            <button onClick={()=>navigate('cart')} className="relative p-2.5 bg-accent text-white hover:bg-white hover:text-brand rounded-full transition-colors shadow-lg shadow-accent/20" title="Корзина">
+                                <i data-lucide="shopping-cart" className="w-5 h-5"></i>
+                                {cart.length > 0 && <span className="absolute -top-1 -right-1 bg-brand text-white border-2 border-accent text-[10px] rounded-full w-5 h-5 flex items-center justify-center font-bold">{cart.reduce((a,c)=>a+c.qty,0)}</span>}
+                            </button>
                         </div>
                     </div>
-                    {menu && <div className="md:hidden bg-brand p-4 flex flex-col gap-4 border-t border-graytext"><input type="text" placeholder="Поиск..." value={search} onChange={e=>{setSearch(e.target.value); nav('catalog');}} className="w-full bg-[#1A2528] rounded p-2 text-white" /><button onClick={()=>nav('catalog')} className="text-left font-bold">Каталог</button><button onClick={()=>nav('b2b')} className="text-left font-bold text-accent">B2B Раздел</button></div>}
+
+                    {/* Мобильное меню (выдвижное) */}
+                    {mobileMenuOpen && (
+                        <div className="lg:hidden bg-[#070D0E] p-4 flex flex-col gap-4 border-t border-graytext/20 shadow-inner">
+                            <input 
+                                type="text" 
+                                placeholder="Поиск..." 
+                                value={globalSearch} 
+                                onChange={e=>{setGlobalSearch(e.target.value); setSearch(e.target.value); navigate('catalog');}} 
+                                className="w-full bg-[#1A2528] rounded-xl p-3 text-white outline-none focus:border focus:border-accent" 
+                            />
+                            <div className="flex flex-col gap-2 mt-2">
+                                <button onClick={()=>navigate('home')} className="text-left font-bold p-3 hover:bg-white/5 rounded-lg flex items-center gap-3"><i data-lucide="home" className="w-5 h-5"></i> Главная</button>
+                                <button onClick={()=>navigate('catalog')} className="text-left font-bold p-3 hover:bg-white/5 rounded-lg flex items-center gap-3"><i data-lucide="grid" className="w-5 h-5"></i> Каталог</button>
+                                <button onClick={()=>navigate('b2b')} className="text-left font-bold text-accent p-3 hover:bg-accent/10 rounded-lg flex items-center gap-3"><i data-lucide="briefcase" className="w-5 h-5"></i> B2B Раздел</button>
+                                <button onClick={()=>navigate('info')} className="text-left font-bold p-3 hover:bg-white/5 rounded-lg flex items-center gap-3"><i data-lucide="info" className="w-5 h-5"></i> Информация</button>
+                            </div>
+                        </div>
+                    )}
                 </header>
             );
 
-            const TopBar = () => <div className="mb-6">{view!=='home' && <Btn v="ghost" cls="p-0 flex items-center gap-1" onClick={goBack}><i data-lucide="arrow-left" className="w-4 h-4"></i> Назад</Btn>}</div>;
-
-            // --- REUSABLE PRODUCT CARD (PLP) ---
-            const ProdCard = ({ p }) => (
-                <div className="bg-white rounded-xl p-4 card-t flex flex-col border border-neutral relative group h-full">
-                    {p.oldPrice && <span className="absolute top-2 left-2 z-10 bg-accent text-white text-[10px] uppercase px-2 py-1 rounded font-bold">Акция</span>}
-                    <div className="relative aspect-square mb-4 bg-base rounded-lg overflow-hidden cursor-pointer" onClick={()=>nav('pdp', p)}>
-                        <img src={p.imgs[0]} className="w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transition-transform" />
-                        <div className="absolute top-2 right-2 flex flex-col gap-2">
-                            <button onClick={(e)=>{e.stopPropagation(); toggleFav(p);}} title="В избранное" className={`p-2 bg-white rounded-full shadow ${favs.find(x=>x.id===p.id)?'text-accent':'text-graytext hover:text-brand'}`}><i data-lucide="heart" className={`w-4 h-4 ${favs.find(x=>x.id===p.id)?'fill-current':''}`}></i></button>
-                            <button onClick={(e)=>{e.stopPropagation(); toggleComp(p);}} title="Сравнить (До 4 шт)" className={`p-2 bg-white rounded-full shadow ${comp.find(x=>x.id===p.id)?'text-brand':'text-graytext hover:text-brand'}`}><i data-lucide="bar-chart-2" className="w-4 h-4"></i></button>
-                        </div>
-                    </div>
-                    <h3 className="font-bold text-brand hover:text-accent flex-1 text-sm cursor-pointer" onClick={()=>nav('pdp', p)}>{p.name}</h3>
-                    
-                    <div className="flex flex-wrap gap-1 my-2 min-h-[44px] content-start">{Object.values(p.specs||{}).slice(0,4).map((s,i)=><span key={i} className="text-[10px] bg-base px-1.5 py-0.5 rounded text-graytext border border-neutral/50">{s}</span>)}</div>
-                    
-                    <div className={`text-[11px] mb-2 font-bold ${p.stock==='В наличии'?'text-green-600':'text-orange-500'}`}>{p.stock}</div>
-                    
-                    <div className="mb-4">
-                        {p.oldPrice && <div className="text-xs text-graytext line-through">{fmtP(p.oldPrice)}</div>}
-                        <div className="text-lg font-bold text-brand">{p.priceText || fmtP(p.price)}</div>
-                    </div>
-
-                    <div className="flex gap-2 mt-auto">
-                        {p.isB2B ? <Btn v="sec" cls="w-full text-xs py-2" onClick={()=>setModal({t:'quote', p})}>Запросить КП</Btn> : <><Btn cls="flex-1 text-xs py-2 px-0" onClick={()=>toCart(p)}>В корзину</Btn><Btn v="out" cls="flex-1 text-xs py-2 px-0" onClick={()=>setModal({t:'1click', p})}>В 1 клик</Btn></>}
-                    </div>
-                </div>
-            );
-
-            // --- VIEWS ---
-            const Home = () => (
-                <div className="fade-in space-y-12">
-                    <div className="bg-[#070D0E] text-white rounded-2xl p-10 lg:p-16 relative overflow-hidden flex items-center justify-center text-center">
-                        <div className="relative z-10"><h1 className="text-4xl md:text-5xl font-bold mb-4 uppercase tracking-widest">Будущее технологий</h1><p className="text-graytext mb-8 max-w-xl mx-auto">Ноутбуки, периферия и профессиональное оборудование с гарантией до 2-х лет.</p><Btn cls="px-8 py-3 mx-auto" onClick={()=>{setCatF('Все'); nav('catalog');}}>Перейти в каталог</Btn></div>
-                        <div className="absolute inset-0 bg-gradient-to-t from-brand to-transparent opacity-80 z-0"></div>
-                    </div>
-                    <div><h2 className="text-2xl font-bold mb-6">Хиты продаж</h2><div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">{DB.slice(0,4).map(p => <ProdCard key={p.id} p={p} />)}</div></div>
-                </div>
-            );
-
-            const Catalog = () => {
-                let res = DB.filter(p => 
-                    (catF==='Все' || p.cat===catF) && 
-                    p.name.toLowerCase().includes(search.toLowerCase()) && 
-                    (brandF==='' || p.brand===brandF) &&
-                    (fGpu==='' || p.specs?.GPU?.includes(fGpu)) && 
-                    (fCpu==='' || p.specs?.CPU?.includes(fCpu)) && 
-                    (fRam==='' || p.specs?.RAM?.includes(fRam)) && 
-                    (fSsd==='' || p.specs?.SSD?.includes(fSsd)) && 
-                    p.price <= priceR && 
-                    (!inStock || p.stock==='В наличии')
-                );
-
-                if(sort==='pop') res.sort((a,b)=>b.pop - a.pop);
-                if(sort==='cheap') res.sort((a,b)=>a.price - b.price);
-                if(sort==='new') res.sort((a,b)=> (a.new===b.new)?0:a.new?-1:1);
-
+            // ==========================================
+            // REUSABLE PRODUCT CARD (PLP)
+            // ==========================================
+            const ProductCard = ({ product }) => {
+                const isAvail = product.stock === 'В наличии';
+                
                 return (
-                    <div className="flex flex-col lg:flex-row gap-8 fade-in">
-                        <aside className="w-full lg:w-64 shrink-0 bg-white p-5 rounded-xl border border-neutral h-fit lg:sticky top-24">
-                            <TopBar />
-                            <h2 className="font-bold mb-4">Категории</h2>
-                            <div className="space-y-2 mb-6 border-b border-neutral pb-4">
-                                {['Все', ...CATS.map(c=>c.id)].map(c => <label key={c} className="flex items-center text-sm cursor-pointer"><input type="radio" checked={catF===c} onChange={()=>setCatF(c)} className="mr-3 text-accent accent-accent"/>{c}</label>)}
-                            </div>
+                    <div className="modern-card bg-white rounded-2xl p-5 flex flex-col relative h-full group">
+                        
+                        {/* Бейджи */}
+                        <div className="absolute top-4 left-4 z-10 flex flex-col gap-1.5">
+                            {product.oldPrice && <span className="bg-accent text-white text-[10px] uppercase px-2.5 py-1 rounded-md font-bold tracking-wider shadow-sm">Акция</span>}
+                            {product.new && <span className="bg-brand text-white text-[10px] uppercase px-2.5 py-1 rounded-md font-bold tracking-wider shadow-sm">Новинка</span>}
+                        </div>
 
-                            <h2 className="font-bold mb-4">Фильтры (Мин. набор)</h2>
-                            <div className="space-y-4 mb-6">
-                                <div><h3 className="text-xs text-graytext mb-1">Бренд</h3><select className="w-full border rounded p-2 text-sm" value={brandF} onChange={e=>setBrandF(e.target.value)}><option value="">Все бренды</option><option value="Thunderobot">Thunderobot</option><option value="MedTech">MedTech</option><option value="CosmePro">CosmePro</option></select></div>
-                                <div><h3 className="text-xs text-graytext mb-1">Цена до: {fmtP(priceR)}</h3><input type="range" min="0" max="3000000" step="50000" value={priceR} onChange={e=>setPriceR(e.target.value)} className="w-full accent-accent" /></div>
-                                <label className="flex items-center text-sm cursor-pointer"><input type="checkbox" checked={inStock} onChange={e=>setInStock(e.target.checked)} className="mr-2 accent-accent"/> Только в наличии</label>
+                        {/* Изображение с локальным фоллбеком */}
+                        <div 
+                            className="relative aspect-square mb-5 bg-base rounded-xl overflow-hidden cursor-pointer flex items-center justify-center p-2" 
+                            onClick={()=>navigate('pdp', product)}
+                        >
+                            <SafeImage src={product.imgs[0]} alt={product.name} className="max-w-full max-h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500" />
+                            
+                            {/* Действия поверх картинки */}
+                            <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <button 
+                                    onClick={(e)=>{e.stopPropagation(); toggleFavorite(product);}} 
+                                    title="В избранное" 
+                                    className={`p-2.5 bg-white rounded-full shadow-md hover:scale-110 transition-transform ${favorites.find(x=>x.id===product.id)?'text-accent':'text-graytext hover:text-brand'}`}
+                                >
+                                    <i data-lucide="heart" className={`w-4 h-4 ${favorites.find(x=>x.id===product.id)?'fill-current':''}`}></i>
+                                </button>
+                                <button 
+                                    onClick={(e)=>{e.stopPropagation(); toggleCompare(product);}} 
+                                    title="Сравнить (До 4 шт)" 
+                                    className={`p-2.5 bg-white rounded-full shadow-md hover:scale-110 transition-transform ${compare.find(x=>x.id===product.id)?'text-brand':'text-graytext hover:text-brand'}`}
+                                >
+                                    <i data-lucide="arrow-left-right" className="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Информация о товаре */}
+                        <div className="flex flex-col flex-1">
+                            <span className="text-[10px] text-graytext uppercase font-bold tracking-widest mb-1">{product.cat}</span>
+                            <h3 className="font-bold text-brand hover:text-accent text-sm md:text-base leading-tight cursor-pointer mb-3" onClick={()=>navigate('pdp', product)}>
+                                {product.name}
+                            </h3>
+                            
+                            {/* Ключевые характеристики */}
+                            <div className="flex flex-wrap gap-1.5 mb-4">
+                                {Object.values(product.specs||{}).slice(0, 4).map((s,i) => (
+                                    <span key={i} className="text-[10px] bg-base px-2 py-1 rounded-md text-graytext border border-neutral/60">{s}</span>
+                                ))}
                             </div>
                             
-                            {catF === 'Игровые ноутбуки' && (
-                                <div className="mt-4 pt-4 border-t border-neutral space-y-4">
-                                    <div><h3 className="text-xs text-graytext mb-1">Процессор (CPU)</h3><select className="w-full border rounded p-2 text-sm" onChange={e=>setFCpu(e.target.value)}><option value="">Все</option><option value="i5-12450H">i5-12450H</option><option value="i9-13900HX">i9-13900HX</option><option value="Ryzen 7">Ryzen 7</option></select></div>
-                                    <div><h3 className="text-xs text-graytext mb-1">Видеокарта (GPU)</h3><select className="w-full border rounded p-2 text-sm" onChange={e=>setFGpu(e.target.value)}><option value="">Все</option><option value="RTX 3050">RTX 3050</option><option value="RTX 3060">RTX 3060</option><option value="RTX 4070">RTX 4070</option></select></div>
-                                    <div><h3 className="text-xs text-graytext mb-1">RAM</h3><select className="w-full border rounded p-2 text-sm" onChange={e=>setFRam(e.target.value)}><option value="">Все</option><option value="16GB">16GB</option><option value="32GB">32GB</option></select></div>
-                                    <div><h3 className="text-xs text-graytext mb-1">SSD</h3><select className="w-full border rounded p-2 text-sm" onChange={e=>setFSsd(e.target.value)}><option value="">Все</option><option value="512GB">512GB</option><option value="1TB">1TB</option></select></div>
+                            <div className="mt-auto">
+                                <div className={`text-[11px] mb-2 font-bold flex items-center gap-1 ${isAvail ? 'text-green-600' : 'text-orange-500'}`}>
+                                    <div className={`w-1.5 h-1.5 rounded-full ${isAvail ? 'bg-green-600' : 'bg-orange-500'}`}></div>
+                                    {product.stock}
                                 </div>
-                            )}
-                            
-                            {/* Форма "Подбор ноутбука" (Пункт 6: Лиды) */}
-                            <Btn v="out" cls="w-full mt-6 text-xs" onClick={()=>setModal({t:'form'})}>Сложный подбор ноутбука</Btn>
-                        </aside>
+                                
+                                <div className="mb-5">
+                                    {product.oldPrice && <div className="text-xs text-graytext line-through mb-0.5">{fmtP(product.oldPrice)}</div>}
+                                    <div className="text-xl font-black text-brand tracking-tight">{product.priceText || fmtP(product.price)}</div>
+                                </div>
 
-                        <div className="flex-1">
-                            <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-                                <div><h1 className="text-2xl font-bold">{catF}</h1><span className="text-sm text-graytext">Найдено товаров: {res.length} из 50</span></div>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm text-graytext">Сортировка:</span>
-                                    <select className="border border-neutral rounded-lg p-2 text-sm bg-white outline-none focus:border-accent" value={sort} onChange={e=>setSort(e.target.value)}><option value="pop">Сначала популярные</option><option value="cheap">Сначала дешевые</option><option value="new">Сначала новинки</option></select>
+                                {/* Кнопки действий (Strict PRD 4.2: В корзину, В 1 клик) */}
+                                <div className="flex gap-2 w-full">
+                                    {product.isB2B ? (
+                                        <Button variant="secondary" className="w-full text-xs py-2.5" onClick={()=>setModal({t:'quote', p: product})}>
+                                            Запросить КП
+                                        </Button>
+                                    ) : (
+                                        <>
+                                            <Button className="flex-1 text-xs py-2.5 px-0" onClick={()=>addToCart(product)}>
+                                                В корзину
+                                            </Button>
+                                            <Button variant="outline" className="flex-1 text-xs py-2.5 px-0" onClick={()=>setModal({t:'1click', p: product})}>
+                                                В 1 клик
+                                            </Button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
-                            {res.length ? <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">{res.map(p => <ProdCard key={p.id} p={p} />)}</div> : <div className="text-center py-20 bg-white rounded-xl text-graytext border border-neutral">Ничего не найдено по заданным фильтрам.</div>}
                         </div>
                     </div>
                 );
             };
 
-            const PDP = () => {
-                const p = activeP;
-                const [iIdx, setIIdx] = useState(0);
-                const [r, setR] = useState(p.variants?.ram[0]);
-                const [s, setS] = useState(p.variants?.ssd[0]);
+            // ==========================================
+            // VIEWS
+            // ==========================================
+
+            // 1. HOME VIEW
+            const HomeView = () => (
+                <div className="fade-in space-y-16">
+                    {/* Hero Banner */}
+                    <div className="bg-[#070D0E] text-white rounded-[2rem] p-10 lg:p-20 relative overflow-hidden flex items-center shadow-2xl">
+                        <div className="relative z-10 max-w-2xl">
+                            <span className="text-accent font-bold tracking-widest uppercase text-sm mb-4 block">Официальный дистрибьютор</span>
+                            <h1 className="text-4xl md:text-6xl font-black mb-6 uppercase tracking-tight leading-tight">Экосистема<br/>Высоких технологий</h1>
+                            <p className="text-graytext text-lg mb-10 max-w-lg">Игровые ноутбуки, периферия и профессиональное B2B оборудование с официальной гарантией 2026 года.</p>
+                            <div className="flex flex-col sm:flex-row gap-4">
+                                <Button className="px-8 py-4 text-lg" onClick={()=>{setFCategory('Все'); navigate('catalog');}}>
+                                    Перейти в каталог
+                                </Button>
+                                <Button variant="secondary" className="px-8 py-4 text-lg border-graytext text-white hover:bg-white hover:text-brand" onClick={()=>navigate('b2b')}>
+                                    Для Юр. лиц
+                                </Button>
+                            </div>
+                        </div>
+                        
+                        {/* Decorative BG */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-[#070D0E] via-[#070D0E]/80 to-transparent z-0"></div>
+                        <div className="absolute right-0 top-0 bottom-0 w-1/2 opacity-50 z-0">
+                            {/* Имитация красивого фона локальной картинкой */}
+                            <SafeImage src="images/tovar1.jpg" alt="Hero" className="w-full h-full object-cover mix-blend-screen" />
+                        </div>
+                    </div>
+
+                    {/* Хиты продаж */}
+                    <div>
+                        <div className="flex justify-between items-end mb-8">
+                            <div>
+                                <h2 className="text-3xl font-black tracking-tight">Хиты продаж</h2>
+                                <p className="text-graytext mt-2">Самые популярные товары этой недели</p>
+                            </div>
+                            <button onClick={()=>{setFCategory('Все'); navigate('catalog');}} className="hidden sm:flex text-accent font-bold items-center gap-1 hover:underline">
+                                Все товары <i data-lucide="arrow-right" className="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {DB.slice(0, 4).map(p => <ProductCard key={p.id} product={p} />)}
+                        </div>
+                    </div>
+
+                    {/* Категории (визуальные) */}
+                    <div>
+                        <h2 className="text-3xl font-black tracking-tight mb-8">Категории</h2>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                            {CATEGORIES.map((c, i) => (
+                                <div key={i} onClick={()=>{setFCategory(c.id); navigate('catalog');}} className="bg-white rounded-2xl p-6 cursor-pointer cat-visual-card relative flex flex-col items-center justify-center text-center shadow-sm">
+                                    <div className="h-24 mb-4">
+                                        <SafeImage src={`images/tovar${c.imgId}.jpg`} alt={c.id} className="max-h-full max-w-full object-contain" />
+                                    </div>
+                                    <div className="text-accent text-[10px] uppercase font-bold tracking-widest mb-1">{c.sub}</div>
+                                    <div className="text-sm font-bold text-brand">{c.id}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+
+            // 2. CATALOG VIEW (PLP)
+            const CatalogView = () => {
+                // Сложная фильтрация из ТЗ
+                let results = DB.filter(p => {
+                    const matchCat = catF === 'Все' || p.cat === catF;
+                    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
+                    const matchBrand = brandF === '' || p.brand === brandF;
+                    const matchPrice = p.price <= priceR;
+                    const matchStock = !inStock || p.stock === 'В наличии';
+                    
+                    // Специфичные фильтры для ноутбуков
+                    const matchGpu = fGpu === '' || p.specs?.GPU?.includes(fGpu);
+                    const matchCpu = fCpu === '' || p.specs?.CPU?.includes(fCpu);
+                    const matchRam = fRam === '' || p.specs?.RAM?.includes(fRam);
+                    const matchSsd = fSsd === '' || p.specs?.SSD?.includes(fSsd);
+
+                    return matchCat && matchSearch && matchBrand && matchPrice && matchStock && matchGpu && matchCpu && matchRam && matchSsd;
+                });
+
+                // Сортировка
+                if (sort === 'pop') results.sort((a,b) => b.pop - a.pop);
+                if (sort === 'cheap') results.sort((a,b) => a.price - b.price);
+                if (sort === 'exp') results.sort((a,b) => b.price - a.price);
+                if (sort === 'new') results.sort((a,b) => (a.new === b.new) ? 0 : a.new ? -1 : 1);
+
+                return (
+                    <div className="flex flex-col lg:flex-row gap-8 fade-in">
+                        {/* Сайдбар с фильтрами */}
+                        <aside className="w-full lg:w-[300px] shrink-0 space-y-6">
+                            <TopBar />
+                            <div className="bg-white p-6 rounded-2xl shadow-soft">
+                                <h2 className="text-lg font-black mb-6 flex items-center gap-2 uppercase tracking-wide border-b border-neutral pb-4"><i data-lucide="filter" className="w-5 h-5 text-accent"></i> Параметры</h2>
+                                
+                                {/* Категории */}
+                                <div className="mb-6">
+                                    <h3 className="text-xs font-bold text-graytext uppercase tracking-widest mb-3">Категория</h3>
+                                    <div className="space-y-3">
+                                        {['Все', ...CATEGORIES.map(c=>c.id)].map(c => (
+                                            <label key={c} className="flex items-center text-sm font-medium cursor-pointer group">
+                                                <input type="radio" checked={catF===c} onChange={()=>setCatF(c)} className="mr-3 w-4 h-4 text-accent border-neutral focus:ring-accent focus:ring-2"/>
+                                                <span className="group-hover:text-accent transition-colors">{c}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Цена и Наличие */}
+                                <div className="mb-6 border-t border-neutral pt-6">
+                                    <h3 className="text-xs font-bold text-graytext uppercase tracking-widest mb-3">Цена до: <span className="text-brand">{fmtP(priceR)}</span></h3>
+                                    <input type="range" min="0" max="3000000" step="50000" value={priceR} onChange={e=>setPriceR(e.target.value)} className="w-full h-2 bg-neutral rounded-lg appearance-none cursor-pointer accent-accent mb-4" />
+                                    
+                                    <label className="flex items-center text-sm font-medium cursor-pointer bg-base p-3 rounded-xl border border-neutral/50 hover:border-accent transition-colors">
+                                        <input type="checkbox" checked={inStock} onChange={e=>setInStock(e.target.checked)} className="mr-3 w-4 h-4 rounded text-accent focus:ring-accent"/> 
+                                        Только в наличии
+                                    </label>
+                                </div>
+
+                                {/* Бренд */}
+                                <div className="mb-6 border-t border-neutral pt-6">
+                                    <SelectField label="Бренд" value={brandF} onChange={e=>setBrandF(e.target.value)} options={[
+                                        {value: "", label: "Все бренды"}, "Thunderobot", "MedTech", "CosmePro", "Logitech", "Samsung"
+                                    ]} />
+                                </div>
+                                
+                                {/* Специфичные фильтры для ноутбуков */}
+                                {catF === 'Игровые ноутбуки' && (
+                                    <div className="mt-6 pt-6 border-t border-neutral space-y-4">
+                                        <SelectField label="Процессор (CPU)" onChange={e=>setFCpu(e.target.value)} options={["", "i5-12450H", "i7-12700H", "i9-13900HX", "Ryzen 7"]} />
+                                        <SelectField label="Видеокарта (GPU)" onChange={e=>setFGpu(e.target.value)} options={["", "RTX 3050", "RTX 3060", "RTX 4070"]} />
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <SelectField label="RAM" onChange={e=>setFRam(e.target.value)} options={["", "16GB", "32GB", "64GB"]} />
+                                            <SelectField label="SSD" onChange={e=>setFSsd(e.target.value)} options={["", "512GB", "1TB", "2TB"]} />
+                                        </div>
+                                    </div>
+                                )}
+                                
+                                {/* Форма лидогенерации */}
+                                <div className="mt-8 pt-6 border-t border-neutral">
+                                    <Button variant="outline" className="w-full text-sm py-3 border-dashed border-2 hover:border-solid hover:border-accent" onClick={()=>setModal({t:'form'})}>
+                                        <i data-lucide="sliders-horizontal" className="w-4 h-4"></i> Сложный подбор
+                                    </Button>
+                                    <p className="text-[10px] text-graytext text-center mt-2">Оставьте заявку, и мы подберем идеальный вариант</p>
+                                </div>
+                            </div>
+                        </aside>
+
+                        {/* Список товаров */}
+                        <div className="flex-1">
+                            {/* Верхняя панель каталога */}
+                            <div className="bg-white p-4 rounded-2xl shadow-soft flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+                                <div>
+                                    <h1 className="text-2xl font-black">{catF}</h1>
+                                    <span className="text-sm text-graytext font-medium">Показано товаров: <span className="text-brand">{results.length}</span> из 50</span>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <span className="text-xs font-bold text-graytext uppercase tracking-wider">Сортировка:</span>
+                                    <select className="border-none bg-base rounded-xl py-2 px-4 text-sm font-bold outline-none cursor-pointer hover:bg-neutral/50 transition-colors" value={sort} onChange={e=>setSort(e.target.value)}>
+                                        <option value="pop">Сначала популярные</option>
+                                        <option value="cheap">Сначала дешевые</option>
+                                        <option value="exp">Сначала дорогие</option>
+                                        <option value="new">Сначала новинки</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {/* Сетка */}
+                            {results.length > 0 ? (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+                                    {results.map(p => <ProductCard key={p.id} product={p} />)}
+                                </div>
+                            ) : (
+                                <div className="flex flex-col items-center justify-center py-32 bg-white rounded-2xl shadow-soft border border-dashed border-neutral text-center px-4">
+                                    <i data-lucide="search-x" className="w-16 h-16 text-neutral mb-4"></i>
+                                    <h3 className="text-xl font-bold mb-2">Ничего не найдено</h3>
+                                    <p className="text-graytext mb-6">Попробуйте изменить параметры фильтрации или поисковый запрос.</p>
+                                    <Button onClick={()=>{setSearch(''); setCatF('Все'); setPriceR(3000000); setInStock(false);}}>Сбросить все фильтры</Button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+            };
+
+            // 3. PRODUCT DETAIL PAGE (PDP)
+            const ProductDetailView = () => {
+                const p = activeProduct;
+                const [imgIdx, setImgIdx] = useState(0);
                 
-                const curP = p.basePrice ? (p.price + (r?.d||0) + (s?.d||0)) : 0;
-                const dSKU = `${p.sku}${r?'-'+r.l:''}${s?'-'+s.l:''}`; 
+                // Вариации
+                const [r, setR] = useState(p.variants?.ram ? p.variants.ram[0] : null);
+                const [s, setS] = useState(p.variants?.ssd ? p.variants.ssd[0] : null);
+                
+                // Динамика (Пункт 4.3 ТЗ)
+                const currentPrice = p.basePrice ? (p.price + (r?.d || 0) + (s?.d || 0)) : p.price;
+                const dynamicSKU = `${p.sku}${r?'-'+r.l:''}${s?'-'+s.l:''}`; 
                 const isAvail = p.stock === 'В наличии';
 
                 return (
                     <div className="fade-in">
                         <TopBar />
-                        <div className="bg-white p-6 md:p-10 rounded-xl border border-neutral mb-8">
-                            <div className="grid md:grid-cols-2 gap-10">
+                        <div className="bg-white p-6 md:p-12 rounded-3xl shadow-xl border border-neutral/50 mb-12">
+                            <div className="grid md:grid-cols-2 gap-12 lg:gap-20">
+                                
+                                {/* Левая колонка: Галерея */}
                                 <div>
-                                    <div className="aspect-square bg-base rounded-xl overflow-hidden mb-4"><img src={p.imgs[iIdx]} className="w-full h-full object-cover mix-blend-multiply" /></div>
-                                    {p.imgs.length>1 && <div className="flex gap-2">{p.imgs.map((im, i) => <img key={i} src={im} onClick={()=>setIIdx(i)} className={`w-16 h-16 rounded border-2 cursor-pointer ${iIdx===i?'border-accent':'border-transparent'}`} />)}</div>}
-                                </div>
-                                <div>
-                                    <h1 className="text-3xl font-bold mb-2 text-brand">{p.name}</h1>
-                                    <div className="flex items-center justify-between mb-4 text-sm">
-                                        <span className="text-graytext">Артикул / SKU: <span className="font-mono text-brand font-bold">{dSKU}</span></span>
-                                        <span className="text-graytext">Бренд: <span className="font-bold text-brand">{p.brand}</span></span>
+                                    <div className="aspect-square bg-base rounded-2xl overflow-hidden mb-4 relative flex items-center justify-center p-4 border border-neutral/30">
+                                        <SafeImage src={p.imgs[imgIdx]} alt={p.name} className="max-w-full max-h-full object-contain mix-blend-multiply" />
+                                        
+                                        {/* Бейджи на карточке */}
+                                        <div className="absolute top-4 left-4 flex flex-col gap-2">
+                                            {p.oldPrice && <span className="bg-accent text-white text-[10px] uppercase px-3 py-1.5 rounded-lg font-bold tracking-wider shadow-md">Акция</span>}
+                                        </div>
                                     </div>
                                     
-                                    <div className={`inline-block px-3 py-1 rounded-full text-xs font-bold mb-6 ${isAvail?'bg-green-100 text-green-700':'bg-orange-100 text-orange-700'}`}>{p.stock} {!isAvail && p.deliveryText && `(${p.deliveryText})`}</div>
+                                    {/* Миниатюры */}
+                                    {p.imgs.length > 1 && (
+                                        <div className="flex gap-3 overflow-x-auto hide-scroll pb-2">
+                                            {p.imgs.map((im, i) => (
+                                                <div key={i} onClick={()=>setIIdx(i)} className={`w-20 h-20 shrink-0 rounded-xl cursor-pointer p-2 flex items-center justify-center transition-all ${iIdx===i ? 'border-2 border-accent bg-accent/5' : 'border border-neutral bg-base hover:border-graytext'}`}>
+                                                    <SafeImage src={im} alt="thumb" className="max-w-full max-h-full object-contain mix-blend-multiply" />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Правая колонка: Информация */}
+                                <div className="flex flex-col">
+                                    {/* Шапка инфо */}
+                                    <div className="mb-6">
+                                        <div className="flex items-center gap-3 mb-3">
+                                            <span className="text-xs font-bold bg-base px-3 py-1 rounded-md text-graytext border border-neutral uppercase tracking-widest">{p.cat}</span>
+                                            <span className="text-xs text-graytext">Бренд: <span className="font-bold text-brand">{p.brand}</span></span>
+                                        </div>
+                                        <h1 className="text-3xl md:text-4xl font-black mb-3 leading-tight tracking-tight">{p.name}</h1>
+                                        <div className="text-sm text-graytext font-medium flex items-center gap-2 bg-base inline-flex px-3 py-1.5 rounded-lg border border-neutral/50">
+                                            Артикул / SKU: <span className="font-mono text-brand font-bold">{dynamicSKU}</span>
+                                        </div>
+                                    </div>
                                     
-                                    <div className="text-4xl font-bold text-brand mb-8">{p.priceText || fmtP(curP)}</div>
-                                    
-                                    {p.variants && (
-                                        <div className="mb-8 space-y-4">
-                                            <div><span className="text-sm font-bold block mb-2 text-brand">Объем RAM:</span> <div className="flex gap-2">{p.variants.ram.map(v=><Btn key={v.l} v={r.l===v.l?'sec':'out'} cls="py-1 px-3 text-sm" onClick={()=>setR(v)}>{v.l}</Btn>)}</div></div>
-                                            <div><span className="text-sm font-bold block mb-2 text-brand">Накопитель SSD:</span> <div className="flex gap-2">{p.variants.ssd.map(v=><Btn key={v.l} v={s.l===v.l?'sec':'out'} cls="py-1 px-3 text-sm" onClick={()=>setS(v)}>{v.l}</Btn>)}</div></div>
+                                    {/* Цена и наличие */}
+                                    <div className="mb-8 p-6 bg-base rounded-2xl border border-neutral/50">
+                                        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-4">
+                                            <div>
+                                                {p.oldPrice && <div className="text-sm text-graytext line-through mb-1">{fmtP(p.oldPrice)}</div>}
+                                                <div className="text-4xl font-black text-brand tracking-tighter">{p.priceText || fmtP(currentPrice)}</div>
+                                            </div>
+                                            <div className={`flex flex-col items-end`}>
+                                                <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold ${isAvail ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
+                                                    <div className={`w-2 h-2 rounded-full ${isAvail ? 'bg-green-600' : 'bg-orange-500'}`}></div>
+                                                    {p.stock}
+                                                </span>
+                                                {!isAvail && p.deliveryText && <span className="text-[10px] text-graytext font-medium mt-1">{p.deliveryText}</span>}
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Варианты конфигурации (Пункт 4.3) */}
+                                        {p.variants && (
+                                            <div className="pt-4 border-t border-neutral space-y-5">
+                                                <div>
+                                                    <span className="text-xs font-bold uppercase tracking-widest text-graytext block mb-2.5">Объем RAM</span> 
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {p.variants.ram.map(v => (
+                                                            <button key={v.l} onClick={()=>setR(v)} className={`py-2 px-4 rounded-xl text-sm font-bold transition-all ${r.l===v.l ? 'bg-brand text-white shadow-md' : 'bg-white border border-neutral text-brand hover:border-graytext'}`}>
+                                                                {v.l}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <span className="text-xs font-bold uppercase tracking-widest text-graytext block mb-2.5">Накопитель SSD</span> 
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {p.variants.ssd.map(v => (
+                                                            <button key={v.l} onClick={()=>setS(v)} className={`py-2 px-4 rounded-xl text-sm font-bold transition-all ${s.l===v.l ? 'bg-brand text-white shadow-md' : 'bg-white border border-neutral text-brand hover:border-graytext'}`}>
+                                                                {v.l}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Предупреждения B2B / Мед (Пункт 4.3) */}
+                                    {p.warning && (
+                                        <div className="bg-orange-50 p-5 rounded-2xl mb-8 border border-orange-200 shadow-sm flex gap-4 items-start">
+                                            <div className="bg-orange-100 p-2 rounded-full shrink-0">
+                                                <i data-lucide="alert-triangle" className="w-6 h-6 text-orange-600"></i>
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-orange-800 text-sm mb-1">Важная информация</h4>
+                                                <p className="text-sm text-orange-900 leading-relaxed">{p.warning}</p>
+                                            </div>
                                         </div>
                                     )}
 
-                                    {p.warning && <div className="bg-orange-50 text-orange-800 p-4 rounded-lg mb-6 text-sm border border-orange-200 flex items-start gap-2"><i data-lucide="alert-triangle" className="w-5 h-5 shrink-0"></i>{p.warning}</div>}
-                                    {p.docs && <div className="mb-6"><span className="text-sm font-bold block mb-2 text-brand">Документы и Сертификаты:</span>{p.docs.map(d=><a key={d} href="#" className="flex items-center gap-2 text-accent text-sm mb-1 hover:underline"><i data-lucide="file-text" className="w-4 h-4"></i>{d}</a>)}</div>}
-                                    
-                                    <div className="flex flex-col gap-3 mb-6 pb-6 border-b border-neutral">
-                                        {p.isB2B ? <Btn cls="py-4 text-lg" onClick={()=>setModal({t:'quote', p})}>Запросить КП</Btn> : <><div className="flex gap-3"><Btn cls="flex-1 py-3 text-base shadow-md" onClick={()=>toCart(p, 1, `${r?.l||''} ${s?.l||''}`, curP)}>В корзину</Btn><Btn v="sec" cls="flex-1 py-3 text-base" onClick={()=>{toCart(p, 1, `${r?.l||''} ${s?.l||''}`, curP); nav('checkout');}}>Купить сейчас</Btn></div></>}
-                                        <div className="flex gap-3"><Btn v="out" cls="flex-1 text-sm" onClick={()=>setModal({t:'1click', p})}>Купить в 1 клик</Btn><Btn v="ghost" cls="flex-1 text-sm border border-transparent hover:border-neutral" onClick={()=>setModal({t:'question', p})}><i data-lucide="help-circle" className="w-4 h-4 mr-1"></i>Задать вопрос</Btn></div>
+                                    {/* Кнопки действий (Strict PRD 4.3: Корзина, Купить сейчас, 1 клик, Вопрос) */}
+                                    <div className="flex flex-col gap-3 mb-8">
+                                        {p.isB2B ? (
+                                            <Button className="py-5 text-lg" onClick={()=>setModal({t:'quote', p})}>
+                                                <i data-lucide="file-text" className="w-5 h-5"></i> Запросить коммерческое предложение
+                                            </Button>
+                                        ) : (
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <Button className="py-4 text-base" onClick={()=>addToCart(p, 1, `${r?.l||''} ${s?.l||''}`, currentPrice)}>
+                                                    <i data-lucide="shopping-cart" className="w-5 h-5"></i> В корзину
+                                                </Button>
+                                                <Button variant="secondary" className="py-4 text-base" onClick={()=>{addToCart(p, 1, `${r?.l||''} ${s?.l||''}`, currentPrice); navigate('checkout');}}>
+                                                    <i data-lucide="credit-card" className="w-5 h-5"></i> Купить сейчас
+                                                </Button>
+                                            </div>
+                                        )}
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <Button variant="outline" className="py-3 text-sm" onClick={()=>setModal({t:'1click', p})}>
+                                                <i data-lucide="zap" className="w-4 h-4 text-accent"></i> Купить в 1 клик
+                                            </Button>
+                                            <Button variant="ghost" className="py-3 text-sm border border-transparent hover:border-neutral/50" onClick={()=>setModal({t:'question', p})}>
+                                                <i data-lucide="help-circle" className="w-4 h-4"></i> Задать вопрос
+                                            </Button>
+                                        </div>
                                     </div>
 
-                                    <div className="bg-base p-4 rounded-lg text-sm mb-8 space-y-2 border border-neutral/50">
-                                        <p><i data-lucide="shield" className="w-4 h-4 inline mr-2 text-graytext"></i> <b>Гарантия:</b> Официальная 1-2 года. <button onClick={()=>nav('info')} className="text-accent hover:underline">Подробности</button></p>
-                                        <p><i data-lucide="truck" className="w-4 h-4 inline mr-2 text-graytext"></i> <b>Доставка:</b> Курьер, СДЭК, Самовывоз, Казпочта.</p>
-                                        <p><i data-lucide="credit-card" className="w-4 h-4 inline mr-2 text-graytext"></i> <b>Оплата:</b> Kaspi, Картой онлайн, Безнал (Юр. лица).</p>
+                                    {/* Доставка/Оплата/Гарантия (Пункт 4.3) */}
+                                    <div className="grid grid-cols-2 gap-4 mb-8">
+                                        <div className="bg-base p-4 rounded-2xl border border-neutral/50">
+                                            <i data-lucide="shield-check" className="w-6 h-6 text-accent mb-2"></i>
+                                            <h4 className="font-bold text-sm mb-1">Гарантия</h4>
+                                            <p className="text-xs text-graytext">Официальная 1-2 года. <button onClick={()=>navigate('info')} className="text-accent hover:underline">Условия</button></p>
+                                        </div>
+                                        <div className="bg-base p-4 rounded-2xl border border-neutral/50">
+                                            <i data-lucide="truck" className="w-6 h-6 text-accent mb-2"></i>
+                                            <h4 className="font-bold text-sm mb-1">Доставка</h4>
+                                            <p className="text-xs text-graytext">СДЭК, Казпочта, Курьер. <button onClick={()=>navigate('info')} className="text-accent hover:underline">Подробнее</button></p>
+                                        </div>
                                     </div>
 
-                                    {p.desc && <div className="space-y-3 text-sm mb-8"><h3 className="font-bold text-lg mb-4 text-brand">Описание</h3><div className="grid gap-2"><p><strong>Для кого:</strong> {p.desc.forWhom}</p><p><strong>Преимущества:</strong> {p.desc.pros}</p><p><strong>Комплектация:</strong> {p.desc.box}</p></div></div>}
+                                    {/* Документы */}
+                                    {p.docs && (
+                                        <div className="mb-8 p-5 bg-white border border-neutral rounded-2xl">
+                                            <span className="text-xs font-bold uppercase tracking-widest text-brand block mb-4 border-b border-neutral pb-2">Документы и Сертификаты</span>
+                                            <div className="space-y-3">
+                                                {p.docs.map((d, i) => (
+                                                    <a key={i} href="#" className="flex items-center gap-3 text-sm group">
+                                                        <div className="w-8 h-8 rounded-lg bg-red-50 text-red-500 flex items-center justify-center group-hover:bg-red-500 group-hover:text-white transition-colors">
+                                                            <i data-lucide="file-text" className="w-4 h-4"></i>
+                                                        </div>
+                                                        <span className="font-medium text-brand group-hover:text-accent transition-colors">{d}</span>
+                                                    </a>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Описание (Структурированное) */}
+                                    {p.desc && (
+                                        <div className="mb-8">
+                                            <h3 className="text-xl font-black mb-4">Описание</h3>
+                                            <div className="space-y-4">
+                                                <div className="bg-base p-4 rounded-xl border border-neutral/30">
+                                                    <strong className="text-sm text-brand block mb-1 flex items-center gap-2"><i data-lucide="user-check" className="w-4 h-4 text-accent"></i> Для кого подходит:</strong> 
+                                                    <span className="text-sm text-graytext">{p.desc.forWhom}</span>
+                                                </div>
+                                                <div className="bg-base p-4 rounded-xl border border-neutral/30">
+                                                    <strong className="text-sm text-brand block mb-1 flex items-center gap-2"><i data-lucide="star" className="w-4 h-4 text-accent"></i> Преимущества:</strong> 
+                                                    <span className="text-sm text-graytext">{p.desc.pros}</span>
+                                                </div>
+                                                <div className="bg-base p-4 rounded-xl border border-neutral/30">
+                                                    <strong className="text-sm text-brand block mb-1 flex items-center gap-2"><i data-lucide="package" className="w-4 h-4 text-accent"></i> Комплектация:</strong> 
+                                                    <span className="text-sm text-graytext">{p.desc.box}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                     
-                                    <h3 className="font-bold mb-4 text-lg text-brand">Характеристики</h3>
-                                    <table className="w-full text-sm"><tbody>{Object.entries(p.specs||{}).map(([k,v]) => <tr key={k} className="border-b border-neutral last:border-0"><td className="py-2.5 text-graytext w-1/3">{k}</td><td className="py-2.5 font-medium">{v}</td></tr>)}</tbody></table>
+                                    {/* Таблица характеристик (Единая таблица) */}
+                                    <div>
+                                        <h3 className="text-xl font-black mb-4">Характеристики</h3>
+                                        <div className="border border-neutral rounded-2xl overflow-hidden">
+                                            <table className="w-full text-sm">
+                                                <tbody>
+                                                    {Object.entries(p.specs||{}).map(([k,v], i) => (
+                                                        <tr key={k} className={`${i % 2 === 0 ? 'bg-white' : 'bg-base'} border-b border-neutral last:border-0 hover:bg-neutral/20 transition-colors`}>
+                                                            <td className="py-3 px-5 text-graytext w-2/5 font-medium">{k}</td>
+                                                            <td className="py-3 px-5 font-bold text-brand">{v}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        {p.cross && <div><h3 className="text-2xl font-bold mb-6">С этим покупают</h3><div className="grid grid-cols-2 md:grid-cols-4 gap-4">{DB.filter(x=>p.cross.includes(x.id)).map(x=><ProdCard key={x.id} p={x}/>)}</div></div>}
+
+                        {/* Кросс-сейлы (Скрин 4.3: Рекомендации) */}
+                        {p.cross && (
+                            <div className="mt-16">
+                                <h3 className="text-3xl font-black mb-8 tracking-tight">С этим товаром покупают</h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                                    {DB.filter(x=>p.cross.includes(x.id)).map(x=><ProductCard key={x.id} product={x}/>)}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 );
             };
 
-            const Wishlist = () => <div className="fade-in"><TopBar /><h1 className="text-2xl font-bold mb-6">Избранное</h1>{favs.length ? <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">{favs.map(p => <ProdCard key={p.id} p={p}/>)}</div> : <div className="text-center py-20 bg-white rounded-xl border border-neutral"><p>Нет сохраненных товаров</p><Btn onClick={()=>nav('catalog')} cls="mt-4">Перейти в каталог</Btn></div>}</div>;
+            // 4. WISHLIST VIEW
+            const WishlistView = () => (
+                <div className="fade-in">
+                    <TopBar />
+                    <div className="flex items-center gap-3 mb-8">
+                        <div className="w-12 h-12 bg-accent/10 text-accent rounded-xl flex items-center justify-center"><i data-lucide="heart" className="w-6 h-6"></i></div>
+                        <h1 className="text-3xl font-black">Избранное</h1>
+                    </div>
+                    
+                    {favorites.length > 0 ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {favorites.map(p => <ProductCard key={p.id} product={p}/>)}
+                        </div>
+                    ) : (
+                        <div className="text-center py-32 bg-white rounded-3xl shadow-soft border border-dashed border-neutral">
+                            <i data-lucide="heart" className="w-16 h-16 text-neutral mb-4 mx-auto"></i>
+                            <h3 className="text-2xl font-bold mb-2">Список пуст</h3>
+                            <p className="text-graytext mb-8">Добавляйте товары в избранное, чтобы не потерять их.</p>
+                            <Button onClick={()=>navigate('catalog')} className="mx-auto">Перейти в каталог</Button>
+                        </div>
+                    )}
+                </div>
+            );
 
-            const Compare = () => {
-                if(!comp.length) return <div className="fade-in"><TopBar/><h2 className="text-2xl font-bold mb-4">Сравнение пусто</h2></div>;
-                const keys = [...new Set(comp.flatMap(p => Object.keys(p.specs||{})))];
+            // 5. COMPARE VIEW
+            const CompareView = () => {
+                if(!compare.length) return (
+                    <div className="fade-in">
+                        <TopBar/>
+                        <div className="text-center py-32 bg-white rounded-3xl shadow-soft border border-dashed border-neutral">
+                            <i data-lucide="arrow-left-right" className="w-16 h-16 text-neutral mb-4 mx-auto"></i>
+                            <h2 className="text-2xl font-bold mb-2">Сравнение пусто</h2>
+                            <p className="text-graytext mb-8">Добавьте до 4-х товаров для сравнения их характеристик.</p>
+                            <Button onClick={()=>navigate('catalog')} className="mx-auto">Перейти в каталог</Button>
+                        </div>
+                    </div>
+                );
+
+                const specsKeys = [...new Set(compare.flatMap(p => Object.keys(p.specs||{})))];
+                
                 return (
-                    <div className="fade-in"><TopBar />
-                        <div className="bg-white p-6 rounded-xl overflow-x-auto border border-neutral">
-                            <h1 className="text-2xl font-bold mb-6">Сравнение ({comp.length} из 4)</h1>
-                            <table className="w-full min-w-[800px] text-sm text-left">
-                                <thead><tr><th className="w-48 border-b border-neutral font-bold text-graytext uppercase text-xs">Авто-группировка</th>{comp.map(p => <th key={p.id} className="p-4 align-top border-b border-neutral"><img src={p.imgs[0]} className="w-24 h-24 object-cover mx-auto mb-3 rounded-lg"/><div className="font-bold text-center mb-2">{p.name}</div><div className="text-center text-accent font-bold mb-3">{p.priceText || fmtP(p.price)}</div><Btn v="out" cls="w-full text-xs" onClick={()=>setComp(c=>c.filter(x=>x.id!==p.id))}>Удалить</Btn></th>)}</tr></thead>
-                                <tbody>{keys.map(k => { const vs = comp.map(p=>p.specs?.[k]||'-'); const isDiff = new Set(vs).size > 1; return <tr key={k} className={`border-b border-neutral ${isDiff ? 'diff-hl' : ''}`}><td className="p-4 font-bold text-brand">{k}</td>{vs.map((v,i) => <td key={i} className="p-4 text-center font-medium">{v}</td>)}</tr> })}</tbody>
-                            </table>
+                    <div className="fade-in">
+                        <TopBar />
+                        <div className="bg-white p-8 rounded-3xl shadow-xl border border-neutral overflow-hidden">
+                            <div className="flex items-center gap-3 mb-8">
+                                <div className="w-12 h-12 bg-brand/5 text-brand rounded-xl flex items-center justify-center"><i data-lucide="arrow-left-right" className="w-6 h-6"></i></div>
+                                <div>
+                                    <h1 className="text-3xl font-black leading-none">Сравнение товаров</h1>
+                                    <p className="text-graytext mt-1 text-sm">Добавлено {compare.length} из 4 возможных</p>
+                                </div>
+                            </div>
+                            
+                            <div className="overflow-x-auto hide-scroll pb-4">
+                                <table className="w-full min-w-[800px] text-sm text-left border-collapse">
+                                    <thead>
+                                        <tr>
+                                            <th className="w-48 border-b-2 border-brand pb-6 align-bottom">
+                                                <span className="text-xs font-bold text-graytext uppercase tracking-widest">Характеристики</span>
+                                                <div className="mt-2 text-[10px] text-accent flex items-center gap-1"><div className="w-2 h-2 bg-[#fef08a] border border-[#F85C58]"></div> — Различаются</div>
+                                            </th>
+                                            {compare.map(p => (
+                                                <th key={p.id} className="p-4 align-top border-b-2 border-brand w-[250px]">
+                                                    <div className="relative bg-base rounded-xl p-4 mb-4 flex items-center justify-center h-40 group cursor-pointer" onClick={()=>navigate('pdp', p)}>
+                                                        <SafeImage src={p.imgs[0]} alt={p.name} className="max-w-full max-h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform" />
+                                                        <button 
+                                                            onClick={(e)=>{e.stopPropagation(); setCompare(c=>c.filter(x=>x.id!==p.id));}} 
+                                                            className="absolute top-2 right-2 w-8 h-8 bg-white text-graytext hover:text-red-500 rounded-full shadow flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                                        >
+                                                            <i data-lucide="x" className="w-4 h-4"></i>
+                                                        </button>
+                                                    </div>
+                                                    <div className="font-bold text-center mb-2 h-10 leading-tight line-clamp-2" title={p.name}>{p.name}</div>
+                                                    <div className="text-center text-accent font-black text-lg mb-4">{p.priceText || fmtP(p.price)}</div>
+                                                    <Button variant="outline" className="w-full text-xs py-2" onClick={()=>addToCart(p)}>В корзину</Button>
+                                                </th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {specsKeys.map((key, idx) => { 
+                                            // Логика подсветки отличий
+                                            const values = compare.map(p => p.specs?.[key] || '-'); 
+                                            const isDifferent = new Set(values).size > 1; 
+                                            
+                                            return (
+                                                <tr key={key} className={`border-b border-neutral transition-colors hover:bg-neutral/10 ${isDifferent ? 'diff-hl' : ''}`}>
+                                                    <td className="py-4 px-2 font-bold text-graytext w-48">{key}</td>
+                                                    {values.map((val, i) => (
+                                                        <td key={i} className="p-4 text-center font-medium text-brand">{val}</td>
+                                                    ))}
+                                                </tr>
+                                            ); 
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 );
             };
 
-            const Cart = () => {
-                const total = cart.reduce((s,i) => s + (i.finalP * i.qty), 0);
-                const hasPreorder = cart.some(i => i.stock !== 'В наличии');
+            // 6. CART VIEW
+            const CartView = () => {
+                const totalAmount = cart.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
+                const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+                const hasPreorder = cart.some(item => item.stock !== 'В наличии');
                 
-                if(!cart.length) return <div className="fade-in"><TopBar/><h2 className="text-2xl font-bold mb-4">Корзина пуста</h2></div>;
+                if(!cart.length) return (
+                    <div className="fade-in">
+                        <TopBar/>
+                        <div className="text-center py-32 bg-white rounded-3xl shadow-soft border border-dashed border-neutral">
+                            <div className="w-20 h-20 bg-neutral/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <i data-lucide="shopping-cart" className="w-10 h-10 text-graytext"></i>
+                            </div>
+                            <h2 className="text-3xl font-black mb-3">Корзина пуста</h2>
+                            <p className="text-graytext mb-8 max-w-sm mx-auto">Похоже, вы еще ничего не добавили. Перейдите в каталог, чтобы найти нужный товар.</p>
+                            <Button onClick={()=>navigate('catalog')} className="mx-auto px-8">К покупкам</Button>
+                        </div>
+                    </div>
+                );
+
                 return (
-                    <div className="max-w-4xl mx-auto fade-in"><TopBar />
-                        <h1 className="text-2xl font-bold mb-6">Корзина</h1>
-                        <div className="grid md:grid-cols-3 gap-8">
-                            <div className="md:col-span-2 space-y-4">
-                                {cart.map((i,x) => (
-                                    <div key={x} className="bg-white p-4 rounded-xl flex items-center gap-4 border border-neutral">
-                                        <img src={i.imgs[0]} className="w-20 h-20 rounded-lg object-cover" />
-                                        <div className="flex-1">
-                                            <h4 className="font-bold text-sm md:text-base text-brand">{i.name}</h4>
-                                            <div className="text-xs text-graytext mt-1">{i.variant}</div>
-                                            {i.stock!=='В наличии' && <div className="text-[10px] text-orange-500 mt-1">{i.deliveryText}</div>}
+                    <div className="max-w-6xl mx-auto fade-in">
+                        <TopBar />
+                        <div className="flex items-center gap-3 mb-8">
+                            <h1 className="text-3xl font-black">Корзина</h1>
+                            <span className="bg-brand text-white text-xs font-bold px-3 py-1 rounded-full">{totalItems}</span>
+                        </div>
+                        
+                        <div className="grid lg:grid-cols-3 gap-8 items-start">
+                            {/* Левая колонка - Список товаров */}
+                            <div className="lg:col-span-2 space-y-4">
+                                {cart.map((item, index) => (
+                                    <div key={index} className="bg-white p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center gap-5 border border-neutral/50 shadow-sm hover:shadow-md transition-shadow">
+                                        <div className="w-24 h-24 shrink-0 bg-base rounded-xl p-2 flex items-center justify-center">
+                                            <SafeImage src={item.imgs[0]} alt={item.name} className="max-w-full max-h-full object-contain mix-blend-multiply" />
                                         </div>
-                                        <div className="flex items-center gap-2 border border-neutral rounded-lg px-2 py-1">
-                                            <button onClick={()=>setCart(c=>c.map((item,idx)=>idx===x?{...item, qty: Math.max(1, item.qty-1)}:item))} className="px-2 font-bold hover:text-accent">-</button>
-                                            <span className="text-sm w-4 text-center font-medium">{i.qty}</span>
-                                            <button onClick={()=>setCart(c=>c.map((item,idx)=>idx===x?{...item, qty: item.qty+1}:item))} className="px-2 font-bold hover:text-accent">+</button>
+                                        
+                                        <div className="flex-1 min-w-0">
+                                            <h4 className="font-bold text-brand text-lg mb-1 truncate" title={item.name}>{item.name}</h4>
+                                            <div className="flex items-center gap-2 mb-2">
+                                                {item.variant && <span className="text-xs bg-base border border-neutral px-2 py-1 rounded text-graytext">{item.variant}</span>}
+                                                {item.stock !== 'В наличии' && <span className="text-[10px] font-bold text-orange-600 bg-orange-100 px-2 py-1 rounded">{item.deliveryText}</span>}
+                                            </div>
+                                            <div className="text-lg font-black text-brand">{fmtP(item.finalPrice)} <span className="text-xs text-graytext font-normal">/ шт.</span></div>
                                         </div>
-                                        <div className="font-bold whitespace-nowrap w-24 text-right text-brand">{fmtP(i.finalP * i.qty)}</div>
-                                        <button onClick={()=>setCart(cart.filter((_,id)=>id!==x))} className="text-graytext hover:text-accent p-2"><i data-lucide="trash-2"></i></button>
+                                        
+                                        <div className="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end mt-4 sm:mt-0">
+                                            {/* Qty Controls */}
+                                            <div className="flex items-center bg-base border border-neutral rounded-xl p-1">
+                                                <button onClick={()=>setCart(c=>c.map((x,i)=>i===index ? {...x, qty: Math.max(1, x.qty-1)} : x))} className="w-8 h-8 flex items-center justify-center hover:bg-white rounded-lg hover:shadow-sm hover:text-accent transition-all font-bold">-</button>
+                                                <span className="w-10 text-center font-bold text-sm">{item.qty}</span>
+                                                <button onClick={()=>setCart(c=>c.map((x,i)=>i===index ? {...x, qty: x.qty+1} : x))} className="w-8 h-8 flex items-center justify-center hover:bg-white rounded-lg hover:shadow-sm hover:text-accent transition-all font-bold">+</button>
+                                            </div>
+                                            
+                                            <div className="text-xl font-black text-brand w-32 text-right hidden sm:block">
+                                                {fmtP(item.finalPrice * item.qty)}
+                                            </div>
+                                            
+                                            <button onClick={()=>setCart(cart.filter((_,id)=>id!==index))} className="text-graytext hover:text-red-500 p-2 rounded-full hover:bg-red-50 transition-colors" title="Удалить">
+                                                <i data-lucide="trash-2" className="w-5 h-5"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
-                            <div className="bg-white p-6 rounded-xl border border-neutral h-fit">
-                                <h3 className="font-bold text-lg mb-4">Итоговая сумма</h3>
-                                <div className="flex justify-between text-sm mb-4"><span className="text-graytext">Товары ({cart.reduce((a,c)=>a+c.qty,0)} шт)</span><span className="font-medium">{fmtP(total)}</span></div>
-                                {hasPreorder && <p className="bg-orange-50 p-3 rounded-lg text-xs text-orange-800 mb-4 flex gap-2 items-start"><i data-lucide="alert-circle" className="w-4 h-4 shrink-0"></i> Внимание: В заказе есть товары "под заказ/предзаказ". Базовый срок поставки ~8 дней.</p>}
-                                <div className="flex justify-between font-bold text-xl mb-6 pt-4 border-t border-neutral"><span>К оплате</span> <span className="text-brand">{fmtP(total)}</span></div>
-                                <Btn cls="w-full py-3" onClick={()=>nav('checkout')}>Оформление заказа</Btn>
+                            
+                            {/* Правая колонка - Итого */}
+                            <div className="bg-white p-8 rounded-3xl shadow-xl border border-neutral sticky top-24">
+                                <h3 className="font-black text-2xl mb-6">Детали заказа</h3>
+                                
+                                <div className="space-y-4 mb-6 text-sm">
+                                    <div className="flex justify-between text-graytext">
+                                        <span>Товары ({totalItems} шт)</span>
+                                        <span className="font-bold text-brand">{fmtP(totalAmount)}</span>
+                                    </div>
+                                    <div className="flex justify-between text-graytext">
+                                        <span>Скидка</span>
+                                        <span className="font-bold text-green-500">0 ₸</span>
+                                    </div>
+                                    <div className="flex justify-between text-graytext pb-4 border-b border-neutral">
+                                        <span>Доставка</span>
+                                        <span className="font-medium text-brand text-right">Рассчитывается<br/>на след. шаге</span>
+                                    </div>
+                                </div>
+
+                                {hasPreorder && (
+                                    <div className="bg-orange-50 p-4 rounded-xl text-xs text-orange-800 mb-6 flex gap-3 items-start border border-orange-200">
+                                        <i data-lucide="clock" className="w-5 h-5 shrink-0 text-orange-500"></i> 
+                                        <p>Внимание: В вашем заказе присутствуют товары "под заказ". Базовый срок поставки до склада в Алматы составляет ~8 дней.</p>
+                                    </div>
+                                )}
+                                
+                                <div className="flex justify-between items-end mb-8 pt-2">
+                                    <span className="text-graytext font-bold uppercase tracking-wider text-xs">К оплате</span> 
+                                    <span className="text-4xl font-black text-brand tracking-tighter">{fmtP(totalAmount)}</span>
+                                </div>
+                                
+                                <Button className="w-full py-4 text-lg" onClick={()=>navigate('checkout')}>
+                                    Перейти к оформлению <i data-lucide="arrow-right" className="w-5 h-5"></i>
+                                </Button>
                             </div>
                         </div>
                     </div>
                 );
             };
 
-            const Checkout = () => {
-                const [b2b, setB2b] = useState(false);
+            // 7. CHECKOUT VIEW
+            const CheckoutView = () => {
+                const [b2bMode, setB2bMode] = useState(false);
+                
+                const handleCheckoutSubmit = (e) => {
+                    e.preventDefault(); 
+                    alert('Заказ успешно оформлен! Статус: Новый -> В обработке. Менеджер свяжется с вами в ближайшее время.'); 
+                    setCart([]); 
+                    navigate('home');
+                };
+
                 return (
-                    <div className="max-w-3xl mx-auto fade-in"><TopBar />
-                        <div className="bg-white p-8 rounded-xl border border-neutral">
-                            <h1 className="text-2xl font-bold mb-6">Оформление заказа (Checkout)</h1>
+                    <div className="max-w-4xl mx-auto fade-in">
+                        <TopBar />
+                        
+                        <div className="bg-white p-8 md:p-12 rounded-3xl shadow-xl border border-neutral">
+                            <div className="flex items-center gap-4 mb-10">
+                                <div className="w-12 h-12 bg-accent text-white rounded-xl flex items-center justify-center shadow-lg shadow-accent/30"><i data-lucide="check-square" className="w-6 h-6"></i></div>
+                                <div>
+                                    <h1 className="text-3xl font-black tracking-tight">Оформление заказа</h1>
+                                    <p className="text-graytext text-sm mt-1">Заполните данные для доставки и оплаты</p>
+                                </div>
+                            </div>
                             
-                            <label className="flex items-center gap-3 mb-8 p-4 border border-neutral rounded-lg bg-base cursor-pointer hover:border-accent transition-colors"><input type="checkbox" checked={b2b} onChange={e=>setB2b(e.target.checked)} className="w-5 h-5 accent-accent" /> <span className="font-bold text-brand">Покупка на юридическое лицо (B2B)</span></label>
+                            {/* Переключатель B2B (Скрин 6, п.5.2) */}
+                            <label className={`flex items-center gap-4 mb-10 p-6 border-2 rounded-2xl cursor-pointer transition-all ${b2bMode ? 'border-accent bg-accent/5' : 'border-neutral bg-base hover:border-graytext/30'}`}>
+                                <div className="relative flex items-center justify-center">
+                                    <input type="checkbox" checked={b2bMode} onChange={e=>setB2bMode(e.target.checked)} className="peer w-6 h-6 appearance-none border-2 border-graytext rounded checked:bg-accent checked:border-accent transition-all" />
+                                    <i data-lucide="check" className="w-4 h-4 text-white absolute opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity"></i>
+                                </div>
+                                <div>
+                                    <span className="font-black text-brand text-lg block">Покупка на юридическое лицо (B2B)</span>
+                                    <span className="text-sm text-graytext">Закрывающие документы, ЭСФ, оплата по выставленному счету</span>
+                                </div>
+                            </label>
                             
-                            <form className="space-y-6" onSubmit={e=>{e.preventDefault(); alert('Заказ успешно оформлен! Статус: Новый -> В обработке'); setCart([]); nav('home');}}>
-                                <div className="grid md:grid-cols-2 gap-5">
-                                    {b2b ? (
-                                        <>
-                                            <div><label className="block text-xs font-bold mb-1 text-graytext uppercase">Название компании *</label><input required className="w-full p-3 border border-neutral rounded-lg focus:border-accent outline-none"/></div>
-                                            <div><label className="block text-xs font-bold mb-1 text-graytext uppercase">БИН/ИНН *</label><input required className="w-full p-3 border border-neutral rounded-lg focus:border-accent outline-none"/></div>
-                                            <div><label className="block text-xs font-bold mb-1 text-graytext uppercase">Юридический адрес *</label><input required className="w-full p-3 border border-neutral rounded-lg focus:border-accent outline-none"/></div>
-                                            <div><label className="block text-xs font-bold mb-1 text-graytext uppercase">Email для счета *</label><input required type="email" className="w-full p-3 border border-neutral rounded-lg focus:border-accent outline-none"/></div>
-                                            <div className="md:col-span-2"><label className="block text-xs font-bold mb-1 text-graytext uppercase">Контактное лицо *</label><input required className="w-full p-3 border border-neutral rounded-lg focus:border-accent outline-none"/></div>
-                                            <div className="md:col-span-2 p-6 border-2 border-dashed border-neutral rounded-lg bg-base text-center"><i data-lucide="file-up" className="mx-auto text-graytext mb-2 w-8 h-8"></i><span className="text-sm font-bold block mb-2">Прикрепить реквизиты (Опционально)</span><input type="file" className="text-sm block mx-auto"/></div>
-                                        </>
-                                    ) : (
-                                        <div className="md:col-span-2"><label className="block text-xs font-bold mb-1 text-graytext uppercase">ФИО *</label><input required placeholder="Иванов Иван Иванович" className="w-full p-3 border border-neutral rounded-lg focus:border-accent outline-none"/></div>
-                                    )}
-                                    
-                                    <div><label className="block text-xs font-bold mb-1 text-graytext uppercase">Телефон *</label><input required type="tel" placeholder="+7" className="w-full p-3 border border-neutral rounded-lg focus:border-accent outline-none"/></div>
-                                    <div><label className="block text-xs font-bold mb-1 text-graytext uppercase">Город *</label><input required className="w-full p-3 border border-neutral rounded-lg focus:border-accent outline-none"/></div>
-                                    <div className="md:col-span-2"><label className="block text-xs font-bold mb-1 text-graytext uppercase">Адрес доставки *</label><input required placeholder="Улица, дом, квартира" className="w-full p-3 border border-neutral rounded-lg focus:border-accent outline-none"/></div>
+                            <form className="space-y-8" onSubmit={handleCheckoutSubmit}>
+                                
+                                {/* Блок 1: Контактные данные */}
+                                <div>
+                                    <h3 className="text-lg font-bold border-b border-neutral pb-2 mb-4">1. Данные покупателя</h3>
+                                    <div className="grid md:grid-cols-2 gap-6">
+                                        {b2bMode ? (
+                                            <>
+                                                <InputField label="Название компании" required placeholder='ТОО "Рога и Копыта"' />
+                                                <InputField label="БИН/ИНН компании" required placeholder="123456789012" />
+                                                <InputField label="Юридический адрес" required placeholder="г. Алматы, пр. Абая..." />
+                                                <InputField label="Email для получения счета" type="email" required placeholder="accounting@company.kz" />
+                                                <div className="md:col-span-2">
+                                                    <InputField label="ФИО контактного лица" required placeholder="Иванов Иван" />
+                                                </div>
+                                                
+                                                {/* Загрузка файла реквизитов */}
+                                                <div className="md:col-span-2 p-8 border-2 border-dashed border-neutral hover:border-accent rounded-2xl bg-base text-center transition-colors group cursor-pointer">
+                                                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm group-hover:bg-accent group-hover:text-white transition-colors">
+                                                        <i data-lucide="file-up" className="w-8 h-8 text-graytext group-hover:text-white transition-colors"></i>
+                                                    </div>
+                                                    <span className="text-base font-bold text-brand block mb-2">Прикрепить карточку предприятия (реквизиты)</span>
+                                                    <span className="text-xs text-graytext block mb-4">PDF, DOC, DOCX до 10 МБ (Опционально)</span>
+                                                    <input type="file" className="text-sm block mx-auto text-graytext file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-brand file:text-white hover:file:bg-accent transition-colors" accept=".pdf,.doc,.docx" />
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <div className="md:col-span-2">
+                                                <InputField label="ФИО получателя" required placeholder="Иванов Иван Иванович" />
+                                            </div>
+                                        )}
+                                        
+                                        <InputField label="Контактный телефон" required type="tel" placeholder="+7 (___) ___-__-__" />
+                                        {!b2bMode && <InputField label="Email (для чека)" type="email" placeholder="ivan@example.com" />}
+                                    </div>
                                 </div>
                                 
-                                <div className="grid md:grid-cols-2 gap-5 pt-4 border-t border-neutral">
-                                    <div><label className="block text-xs font-bold mb-2 text-graytext uppercase">Способ доставки *</label><select className="w-full p-3 border border-neutral rounded-lg bg-white outline-none focus:border-accent"><option>Курьер</option><option>СДЭК</option><option>Boxberry</option><option>Казпочта</option><option>Самовывоз</option></select></div>
-                                    <div><label className="block text-xs font-bold mb-2 text-graytext uppercase">Способ оплаты *</label><select className="w-full p-3 border border-neutral rounded-lg bg-white outline-none focus:border-accent">{b2b ? <option>Безналичный расчет (Счет на оплату)</option> : <><option>Kaspi</option><option>Оплата картой / Онлайн-эквайринг</option><option>Перевод</option></>}</select></div>
+                                {/* Блок 2: Доставка */}
+                                <div>
+                                    <h3 className="text-lg font-bold border-b border-neutral pb-2 mb-4">2. Доставка</h3>
+                                    <div className="grid md:grid-cols-2 gap-6">
+                                        <InputField label="Город" required placeholder="Алматы" />
+                                        <SelectField label="Способ доставки" required options={["СДЭК", "Boxberry", "Казпочта", "Курьер (до двери)", "Самовывоз (склад Алматы)"]} />
+                                        <div className="md:col-span-2">
+                                            <InputField label="Точный адрес (улица, дом, кв/офис)" required placeholder="пр. Достык, д. 1, офис 10" />
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div><label className="block text-xs font-bold mb-1 text-graytext uppercase">Комментарий к заказу (опционально)</label><textarea rows="3" className="w-full p-3 border border-neutral rounded-lg focus:border-accent outline-none resize-none"></textarea></div>
+                                {/* Блок 3: Оплата */}
+                                <div>
+                                    <h3 className="text-lg font-bold border-b border-neutral pb-2 mb-4">3. Оплата</h3>
+                                    <div className="grid md:grid-cols-2 gap-6">
+                                        <SelectField label="Способ оплаты" required options={b2bMode ? ["Безналичный расчет (Счет на оплату)"] : ["Kaspi / QR", "Оплата картой онлайн (Эквайринг)", "Банковский перевод"]} />
+                                    </div>
+                                </div>
 
-                                <Btn cls="w-full py-4 text-lg mt-4 shadow-lg shadow-accent/20">Подтвердить заказ</Btn>
+                                {/* Комментарий */}
+                                <div>
+                                    <label className="text-xs font-bold text-graytext uppercase tracking-wider block mb-1.5">Комментарий к заказу (Опционально)</label>
+                                    <textarea rows="4" placeholder="Дополнительная информация для курьера или менеджера..." className="w-full p-4 bg-white border border-neutral rounded-xl focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all shadow-sm resize-none"></textarea>
+                                </div>
+
+                                {/* Submit */}
+                                <div className="pt-8 border-t border-neutral flex flex-col items-center">
+                                    <Button type="submit" className="w-full md:w-auto md:min-w-[300px] py-5 text-xl uppercase tracking-wider shadow-xl shadow-accent/30">
+                                        Оформить заказ
+                                    </Button>
+                                    <p className="text-xs text-graytext mt-4 text-center max-w-md">
+                                        Нажимая кнопку, вы соглашаетесь с <button type="button" onClick={()=>navigate('info')} className="text-accent underline">Политикой конфиденциальности</button> и правилами продажи.
+                                    </p>
+                                </div>
                             </form>
                         </div>
                     </div>
                 );
             };
 
-            const B2BPage = () => (
-                <div className="fade-in max-w-4xl mx-auto"><TopBar />
-                    <div className="bg-brand text-white rounded-2xl p-10 mb-8 flex flex-col md:flex-row items-center gap-8 shadow-xl">
-                        <div className="flex-1"><h1 className="text-3xl font-bold mb-4 uppercase tracking-widest text-accent">Юр. лицам (B2B)</h1><p className="text-graytext mb-6">Оснащаем клиники, салоны и офисы под ключ. Полный пакет документов, ЭСФ, регистрационные удостоверения.</p><Btn cls="px-6 py-3" onClick={()=>setModal({t:'quote'})}>Запрос КП для оборудования</Btn></div>
-                        <i data-lucide="building-2" className="w-32 h-32 text-graytext/20"></i>
-                    </div>
-                </div>
-            );
-
-            // ИНТЕГРАЦИИ (Пункт 7. Этап 1)
-            const Integrations = () => (
-                <div className="fade-in max-w-4xl mx-auto"><TopBar />
-                    <h1 className="text-3xl font-bold mb-8">Интеграции (Этап 1)</h1>
-                    <div className="grid md:grid-cols-2 gap-6">
-                        <div className="bg-white p-6 rounded-xl border border-neutral">
-                            <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-brand"><i data-lucide="file-spreadsheet" className="text-green-600"></i> Excel-импорт (Обязательно)</h2>
-                            <p className="text-sm text-graytext mb-4">На этапе 1 наполнение выполняется через Excel-импорт по шаблону. Загрузите файл для обновления товаров и остатков.</p>
-                            <input type="file" accept=".xlsx" className="block w-full text-sm mb-4 border border-dashed border-neutral p-4 rounded-lg bg-base" />
-                            <Btn v="sec" cls="w-full text-sm">Синхронизировать базу</Btn>
+            // 8. B2B PAGE
+            const B2BPageView = () => (
+                <div className="fade-in max-w-5xl mx-auto">
+                    <TopBar />
+                    <div className="bg-[#070D0E] text-white rounded-[2rem] p-10 md:p-16 mb-12 flex flex-col md:flex-row items-center gap-10 shadow-2xl relative overflow-hidden">
+                        <div className="relative z-10 flex-1">
+                            <span className="text-accent font-bold uppercase tracking-widest text-sm mb-3 block">Корпоративный отдел</span>
+                            <h1 className="text-4xl md:text-5xl font-black mb-6 uppercase tracking-tight leading-tight">B2B Продажи<br/>и оснащение</h1>
+                            <p className="text-neutral mb-8 text-lg max-w-lg">Оснащаем клиники, салоны красоты и современные офисы оборудованием под ключ. Полный пакет закрывающих документов по законам РК.</p>
+                            <Button className="px-8 py-4 text-lg" onClick={()=>setModal({t:'quote', p: null})}>
+                                Оставить заявку на сотрудничество
+                            </Button>
                         </div>
-                        <div className="bg-white p-6 rounded-xl border border-neutral flex flex-col">
-                            <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-brand"><i data-lucide="database" className="text-accent"></i> Источники ассортимента</h2>
-                            <ul className="space-y-4 text-sm flex-1">
-                                <li><a href="https://kaspi.kz/shop/search/?q=%3AallMerchants%3A30093000" target="_blank" className="text-accent font-bold hover:underline flex items-center gap-1"><i data-lucide="external-link" className="w-4 h-4"></i> Kaspi.kz (JOHNGALTAZ)</a></li>
-                                <li><a href="https://m.halykmarket.kz/merchant/27172?f=merchantName%3AJohnGaltAZ%20" target="_blank" className="text-accent font-bold hover:underline flex items-center gap-1"><i data-lucide="external-link" className="w-4 h-4"></i> Halyk Market (JohnGaltAZ)</a></li>
-                            </ul>
-                            <div className="mt-4 pt-4 border-t border-neutral text-[10px] text-graytext">Автоматическая синхронизация/парсинг по API - отдельная задача (опционально для Этапа 2).</div>
+                        <div className="relative z-10 hidden md:block">
+                            <i data-lucide="building-2" className="w-48 h-48 text-white/10 transform rotate-12"></i>
+                        </div>
+                        <div className="absolute inset-0 bg-gradient-to-r from-brand via-brand to-transparent z-0"></div>
+                    </div>
+                    
+                    <h2 className="text-3xl font-black mb-8 text-center">Почему работают с нами</h2>
+                    <div className="grid md:grid-cols-3 gap-8">
+                        {[
+                            {i: 'file-check-2', t: 'Белые документы', d: 'Работаем официально. Предоставляем ЭСФ, накладные, акты, сертификаты соответствия и регистрационные удостоверения.'},
+                            {i: 'percent', t: 'Оптовые цены', d: 'Специальные условия, квоты и прогрессивные скидки при закупке партии оборудования от 3-х единиц.'},
+                            {i: 'truck', t: 'Логистика', d: 'Берем на себя надежную упаковку, страхование и доставку крупногабаритного мед. оборудования по всему Казахстану.'}
+                        ].map((item, idx) => (
+                            <div key={idx} className="bg-white p-8 rounded-3xl border border-neutral shadow-soft hover:shadow-xl transition-shadow hover:-translate-y-1 transform">
+                                <div className="w-16 h-16 bg-accent/10 rounded-2xl flex items-center justify-center mb-6">
+                                    <i data-lucide={item.i} className="text-accent w-8 h-8"></i>
+                                </div>
+                                <h3 className="font-black text-xl mb-3">{item.t}</h3>
+                                <p className="text-graytext leading-relaxed">{item.d}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+
+            // 9. INTEGRATIONS (Пункт 7 ТЗ - Админка)
+            const IntegrationsView = () => (
+                <div className="fade-in max-w-5xl mx-auto">
+                    <TopBar />
+                    <div className="flex items-center gap-4 mb-10">
+                        <div className="w-12 h-12 bg-brand text-white rounded-xl flex items-center justify-center shadow-lg"><i data-lucide="settings-2" className="w-6 h-6"></i></div>
+                        <div>
+                            <h1 className="text-3xl font-black tracking-tight">Интеграции и Управление</h1>
+                            <p className="text-graytext text-sm mt-1">Панель администратора (Этап 1)</p>
+                        </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-8">
+                        {/* Excel Импорт */}
+                        <div className="bg-white p-8 rounded-3xl border border-neutral shadow-soft">
+                            <h2 className="text-xl font-black mb-2 flex items-center gap-2 text-brand">
+                                <i data-lucide="file-spreadsheet" className="text-green-600"></i> Excel-импорт (База)
+                            </h2>
+                            <p className="text-sm text-graytext mb-6">На этапе 1 наполнение сайта, обновление цен и остатков выполняется через Excel-импорт по стандартизированному шаблону.</p>
+                            
+                            <div className="border-2 border-dashed border-neutral rounded-2xl p-8 text-center bg-base hover:border-green-500 transition-colors mb-6 cursor-pointer group">
+                                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm group-hover:bg-green-500 group-hover:text-white transition-colors">
+                                    <i data-lucide="upload-cloud" className="w-8 h-8 text-graytext group-hover:text-white"></i>
+                                </div>
+                                <span className="text-base font-bold text-brand block mb-2">Загрузить файл каталога (.xlsx)</span>
+                                <input type="file" accept=".xlsx" className="block w-full text-sm text-center mx-auto text-graytext file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-brand file:text-white hover:file:bg-green-600 transition-colors cursor-pointer" />
+                            </div>
+                            
+                            <Button className="w-full bg-green-600 hover:bg-green-700 shadow-green-600/30" onClick={()=>alert('Синхронизация базы данных успешно запущена в фоновом режиме.')}>
+                                <i data-lucide="refresh-cw" className="w-4 h-4"></i> Синхронизировать базу
+                            </Button>
+                        </div>
+
+                        {/* Источники (Kaspi/Halyk) */}
+                        <div className="bg-white p-8 rounded-3xl border border-neutral shadow-soft flex flex-col">
+                            <h2 className="text-xl font-black mb-2 flex items-center gap-2 text-brand">
+                                <i data-lucide="database" className="text-accent"></i> Источники ассортимента
+                            </h2>
+                            <p className="text-sm text-graytext mb-6">Официальные площадки магазина JOHNGALTAZ для формирования каталога.</p>
+                            
+                            <div className="space-y-4 flex-1">
+                                <a href="https://kaspi.kz/shop/search/?q=%3AallMerchants%3A30093000" target="_blank" className="flex items-center gap-4 p-4 rounded-xl border border-neutral hover:border-accent hover:shadow-md transition-all group">
+                                    <div className="w-10 h-10 bg-red-500 text-white rounded-lg flex items-center justify-center font-bold text-xl">K</div>
+                                    <div className="flex-1">
+                                        <h4 className="font-bold text-brand group-hover:text-accent transition-colors">Kaspi.kz</h4>
+                                        <p className="text-xs text-graytext">Магазин JOHNGALTAZ</p>
+                                    </div>
+                                    <i data-lucide="external-link" className="text-graytext group-hover:text-accent w-5 h-5"></i>
+                                </a>
+                                
+                                <a href="https://m.halykmarket.kz/merchant/27172?f=merchantName%3AJohnGaltAZ%20" target="_blank" className="flex items-center gap-4 p-4 rounded-xl border border-neutral hover:border-accent hover:shadow-md transition-all group">
+                                    <div className="w-10 h-10 bg-green-600 text-white rounded-lg flex items-center justify-center font-bold text-xl">H</div>
+                                    <div className="flex-1">
+                                        <h4 className="font-bold text-brand group-hover:text-accent transition-colors">Halyk Market</h4>
+                                        <p className="text-xs text-graytext">Мерчант JohnGaltAZ</p>
+                                    </div>
+                                    <i data-lucide="external-link" className="text-graytext group-hover:text-accent w-5 h-5"></i>
+                                </a>
+                            </div>
+
+                            <div className="mt-6 pt-4 border-t border-neutral bg-blue-50 p-4 rounded-xl flex gap-3">
+                                <i data-lucide="info" className="w-5 h-5 text-blue-500 shrink-0"></i>
+                                <p className="text-xs text-blue-800 leading-relaxed">
+                                    <b>Примечание:</b> На этапе 1 автоматический парсинг по API не подключен. Наполнение выполняется через Excel-импорт по шаблону выше. Автоматическая синхронизация (API) - задача Этапа 2.
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
             );
 
-            const Info = () => (
-                <div className="fade-in max-w-4xl mx-auto"><TopBar /><h1 className="text-3xl font-bold mb-8">Информация и Документы</h1>
-                    <div className="grid md:grid-cols-2 gap-6">
-                        <div className="bg-white p-6 rounded-xl border border-neutral hover:border-accent transition-colors"><h2 className="text-xl font-bold mb-2"><i data-lucide="truck" className="inline mr-2 text-accent"></i> Доставка и Оплата</h2><p className="text-sm text-graytext">СДЭК, Boxberry, Казпочта. Оплата Kaspi, картой, перевод, онлайн-эквайринг.</p></div>
-                        <div className="bg-white p-6 rounded-xl border border-neutral hover:border-accent transition-colors"><h2 className="text-xl font-bold mb-2"><i data-lucide="shield-check" className="inline mr-2 text-accent"></i> Гарантия и возврат</h2><p className="text-sm text-graytext">Гарантия на всю технику от 1 года. Возврат товара надлежащего качества.</p></div>
-                        <div className="bg-white p-6 rounded-xl border border-neutral hover:border-accent transition-colors md:col-span-2"><h2 className="text-xl font-bold mb-2"><i data-lucide="lock" className="inline mr-2 text-accent"></i> Политика конфиденциальности и Соглашение</h2><p className="text-sm text-graytext">Мы используем файлы Cookie.</p></div>
+            // 10. INFO PAGE (Доставка, Гарантия)
+            const InfoView = () => (
+                <div className="fade-in max-w-4xl mx-auto">
+                    <TopBar />
+                    <h1 className="text-4xl font-black mb-10 tracking-tight">Информация для клиентов</h1>
+                    <div className="space-y-6">
+                        <div className="bg-white p-8 rounded-3xl border border-neutral shadow-sm hover:shadow-md transition-shadow">
+                            <h2 className="text-2xl font-black mb-4 flex items-center gap-3"><i data-lucide="truck" className="text-accent w-8 h-8 bg-accent/10 p-1.5 rounded-lg"></i> Доставка и Оплата</h2>
+                            <p className="text-graytext mb-4 leading-relaxed">Мы отправляем заказы в день подтверждения. Доставка осуществляется курьерской службой (до двери), транспортными компаниями СДЭК, Boxberry и Казпочтой по всему Казахстану. Доступен самовывоз со склада в Алматы.</p>
+                            <p className="text-graytext leading-relaxed"><b>Оплата:</b> Kaspi QR, банковскими картами Visa/Mastercard (онлайн-эквайринг), банковским переводом, а также по безналичному расчету для юридических лиц.</p>
+                        </div>
+                        <div className="bg-white p-8 rounded-3xl border border-neutral shadow-sm hover:shadow-md transition-shadow">
+                            <h2 className="text-2xl font-black mb-4 flex items-center gap-3"><i data-lucide="shield-check" className="text-accent w-8 h-8 bg-accent/10 p-1.5 rounded-lg"></i> Гарантия и возврат</h2>
+                            <p className="text-graytext leading-relaxed">Мы предоставляем официальную гарантию от производителей на всю электронику и оборудование сроком от 1 до 2 лет. Возврат товара надлежащего качества возможен в течение 14 дней согласно Закону РК «О защите прав потребителей».</p>
+                        </div>
+                        <div className="bg-white p-8 rounded-3xl border border-neutral shadow-sm hover:shadow-md transition-shadow">
+                            <h2 className="text-2xl font-black mb-4 flex items-center gap-3"><i data-lucide="lock" className="text-accent w-8 h-8 bg-accent/10 p-1.5 rounded-lg"></i> Политика конфиденциальности</h2>
+                            <p className="text-graytext leading-relaxed">Сайт использует файлы cookie для улучшения пользовательского опыта. Ваши персональные данные (ФИО, телефон, email, адреса) надежно зашифрованы и не передаются третьим лицам. Оформляя заказ, вы даете согласие на обработку персональных данных.</p>
+                        </div>
                     </div>
                 </div>
             );
 
+            // ==========================================
+            // MAIN RENDER LOOP
+            // ==========================================
             return (
-                <div className="min-h-screen flex flex-col font-sans pb-20">
+                <div className="min-h-screen flex flex-col font-sans pb-[100px]">
                     <Header />
-                    <main className="flex-1 max-w-7xl mx-auto w-full p-4 py-8">
-                        {view==='home'&&<Home/>}{view==='catalog'&&<Catalog/>}{view==='pdp'&&<PDP/>}{view==='compare'&&<Compare/>}{view==='wishlist'&&<Wishlist/>}{view==='cart'&&<Cart/>}{view==='checkout'&&<Checkout/>}{view==='info'&&<Info/>}{view==='b2b'&&<B2BPage/>}{view==='integrations'&&<Integrations/>}
+                    
+                    <main className="flex-1 max-w-[1400px] mx-auto w-full p-4 py-8 md:py-12">
+                        {view === 'home' && <HomeView />}
+                        {view === 'catalog' && <CatalogView />}
+                        {view === 'pdp' && <ProductDetailView />}
+                        {view === 'compare' && <CompareView />}
+                        {view === 'wishlist' && <WishlistView />}
+                        {view === 'cart' && <CartView />}
+                        {view === 'checkout' && <CheckoutView />}
+                        {view === 'info' && <InfoView />}
+                        {view === 'b2b' && <B2BPageView />}
+                        {view === 'integrations' && <IntegrationsView />}
                     </main>
-                    <footer className="bg-[#070D0E] text-graytext py-12 mt-auto border-t-2 border-accent">
-                        <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-4 gap-8">
-                            <div className="md:col-span-2"><h3 className="text-white font-bold text-xl mb-4 tracking-widest uppercase">JOHNGALTAZ</h3><p className="text-sm mb-4 max-w-sm">Официальный магазин профессионального оборудования и топовых игровых решений в Казахстане.</p></div>
-                            <div><h4 className="text-white font-bold mb-4">Навигация</h4><ul className="space-y-2 text-sm"><li><button onClick={()=>{setCatF('Все'); nav('catalog');}} className="hover:text-accent">Каталог товаров</button></li><li><button onClick={()=>nav('b2b')} className="hover:text-accent">B2B отдел (Юр. лица)</button></li><li><button onClick={()=>nav('integrations')} className="hover:text-accent flex items-center gap-1"><i data-lucide="settings" className="w-3 h-3"></i> Интеграции / Админка</button></li></ul></div>
-                            <div><h4 className="text-white font-bold mb-4">Документы</h4><ul className="space-y-2 text-sm"><li><button onClick={()=>nav('info')} className="hover:text-accent">Политика конфиденциальности</button></li><li><button onClick={()=>nav('info')} className="hover:text-accent">Гарантия и возврат</button></li></ul></div>
+                    
+                    {/* FOOTER (Strictly updated Year to 2026 per request) */}
+                    <footer className="bg-[#070D0E] text-graytext py-16 mt-auto border-t-[3px] border-accent relative z-10">
+                        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+                            <div className="lg:col-span-2">
+                                <h3 className="text-white font-black text-2xl mb-6 tracking-widest uppercase flex items-center gap-2"><i data-lucide="cpu" className="text-accent w-6 h-6"></i> JOHNGALTAZ</h3>
+                                <p className="text-sm mb-6 max-w-md leading-relaxed">Крупнейший официальный интернет-магазин профессионального B2B оборудования и топовых геймерских решений на территории Республики Казахстан.</p>
+                                <div className="flex gap-4">
+                                    <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-accent hover:text-white transition-colors"><i data-lucide="instagram" className="w-5 h-5"></i></a>
+                                    <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-accent hover:text-white transition-colors"><i data-lucide="facebook" className="w-5 h-5"></i></a>
+                                    <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-accent hover:text-white transition-colors"><i data-lucide="youtube" className="w-5 h-5"></i></a>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 className="text-white font-bold text-lg mb-6 uppercase tracking-wider">Навигация</h4>
+                                <ul className="space-y-3 text-sm font-medium">
+                                    <li><button onClick={()=>{setFCategory('Все'); navigate('catalog');}} className="hover:text-accent transition-colors flex items-center gap-2"><i data-lucide="chevron-right" className="w-3 h-3"></i> Каталог товаров</button></li>
+                                    <li><button onClick={()=>navigate('b2b')} className="hover:text-accent transition-colors flex items-center gap-2"><i data-lucide="chevron-right" className="w-3 h-3"></i> B2B Отдел (Юр. лицам)</button></li>
+                                    <li><button onClick={()=>navigate('info')} className="hover:text-accent transition-colors flex items-center gap-2"><i data-lucide="chevron-right" className="w-3 h-3"></i> Доставка и оплата</button></li>
+                                    <li className="pt-4 mt-4 border-t border-graytext/20">
+                                        <button onClick={()=>navigate('integrations')} className="text-accent hover:text-white transition-colors flex items-center gap-2">
+                                            <i data-lucide="settings-2" className="w-4 h-4"></i> Интеграции / Админка
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 className="text-white font-bold text-lg mb-6 uppercase tracking-wider">Правовая база</h4>
+                                <ul className="space-y-3 text-sm font-medium">
+                                    <li><button onClick={()=>navigate('info')} className="hover:text-accent transition-colors flex items-center gap-2"><i data-lucide="chevron-right" className="w-3 h-3"></i> Политика конфиденциальности</button></li>
+                                    <li><button onClick={()=>navigate('info')} className="hover:text-accent transition-colors flex items-center gap-2"><i data-lucide="chevron-right" className="w-3 h-3"></i> Пользовательское соглашение</button></li>
+                                    <li><button onClick={()=>navigate('info')} className="hover:text-accent transition-colors flex items-center gap-2"><i data-lucide="chevron-right" className="w-3 h-3"></i> Гарантия и возврат</button></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div className="max-w-7xl mx-auto px-6 mt-16 pt-8 border-t border-graytext/20 flex flex-col md:flex-row justify-between items-center gap-4">
+                            <div className="text-sm font-medium">© 2026 JOHNGALTAZ. Все права защищены.</div>
+                            <div className="flex items-center gap-2 text-xs">
+                                Разработано <i data-lucide="heart" className="w-3 h-3 text-accent fill-current"></i> Lead Dev AIRIS
+                            </div>
                         </div>
                     </footer>
                     
-                    {/* Лиды: Плавающие кнопки (Скрин 7, п.6) */}
-                    <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-50"><button className="bg-[#27A7E7] text-white p-4 rounded-full shadow-xl hover:scale-110 transition-transform"><i data-lucide="send"></i></button><button className="bg-[#25D366] text-white p-4 rounded-full shadow-xl hover:scale-110 transition-transform"><i data-lucide="message-circle"></i></button></div>
+                    {/* ЛИДЫ: Плавающие кнопки (Скрин 7, п.6) WhatsApp и Telegram */}
+                    <div className="fixed bottom-8 right-8 flex flex-col gap-4 z-[60]">
+                        <a href="https://t.me/" target="_blank" title="Связаться в Telegram" className="bg-[#27A7E7] text-white p-4 rounded-full shadow-2xl hover:scale-110 hover:-translate-y-1 transition-all flex items-center justify-center group">
+                            <i data-lucide="send" className="w-6 h-6 group-hover:animate-pulse"></i>
+                        </a>
+                        <a href="https://wa.me/" target="_blank" title="Написать в WhatsApp" className="bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:scale-110 hover:-translate-y-1 transition-all flex items-center justify-center group">
+                            <i data-lucide="message-circle" className="w-6 h-6 group-hover:animate-pulse"></i>
+                        </a>
+                    </div>
+
+                    {/* Глобальный Toast Notification */}
+                    {toastMsg && (
+                        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-brand text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 z-[70] fade-in border border-white/10">
+                            <div className="bg-green-500/20 text-green-400 p-1.5 rounded-full"><i data-lucide="check" className="w-4 h-4"></i></div>
+                            <span className="font-bold text-sm">{toastMsg}</span>
+                        </div>
+                    )}
                     
-                    {/* Лиды: Формы (Скрин 7, п.6) */}
-                    {modal && <div className="fixed inset-0 bg-brand/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 fade-in"><div className="bg-white p-8 rounded-xl w-full max-w-md relative shadow-2xl border-t-4 border-accent"><button onClick={()=>setModal(null)} className="absolute top-4 right-4 text-graytext hover:text-brand"><i data-lucide="x"></i></button><h2 className="text-2xl font-bold mb-2">{modal.t==='quote'?'Запрос КП для оборудования':modal.t==='question'?'Задать вопрос менеджеру':modal.t==='1click'?'Форма «Купить в 1 клик»':'Форма «Подбор ноутбука»'}</h2>{modal.p && <p className="text-sm text-graytext mb-6">Товар: <span className="font-bold text-brand">{modal.p.name}</span></p>}<input placeholder={modal.t==='quote'?"Компания / ИНН":"Имя"} className="w-full p-3 border border-neutral rounded-lg mb-4 focus:border-accent outline-none" /><input placeholder="Телефон" type="tel" className="w-full p-3 border border-neutral rounded-lg mb-6 focus:border-accent outline-none" /><Btn cls="w-full py-4 text-lg shadow-lg shadow-accent/30" onClick={()=>{alert('Ваша заявка успешно отправлена! Менеджер свяжется с вами.');setModal(null)}}>Отправить заявку</Btn></div></div>}
+                    {/* МОДАЛЬНЫЕ ОКНА ЛИДОВ (Скрин 7, п.6) */}
+                    {modal && (
+                        <div className="fixed inset-0 bg-brand/90 backdrop-blur-md flex items-center justify-center p-4 z-[80] fade-in">
+                            <div className="bg-white p-8 md:p-10 rounded-[2rem] w-full max-w-md relative shadow-2xl border-t-[6px] border-accent">
+                                <button onClick={()=>setModal(null)} className="absolute top-6 right-6 text-graytext hover:text-accent bg-base p-2 rounded-full transition-colors">
+                                    <i data-lucide="x" className="w-5 h-5"></i>
+                                </button>
+                                
+                                <div className="mb-8">
+                                    <div className="w-12 h-12 bg-accent/10 text-accent rounded-2xl flex items-center justify-center mb-4">
+                                        <i data-lucide={modal.t === 'quote' ? 'file-text' : modal.t === '1click' ? 'zap' : modal.t === 'question' ? 'help-circle' : 'sliders-horizontal'} className="w-6 h-6"></i>
+                                    </div>
+                                    <h2 className="text-2xl font-black mb-2 tracking-tight">
+                                        {modal.t === 'quote' ? 'Запрос КП (B2B)' : 
+                                         modal.t === 'question' ? 'Задать вопрос менеджеру' : 
+                                         modal.t === '1click' ? 'Покупка в 1 клик' : 
+                                         'Сложный подбор техники'}
+                                    </h2>
+                                    <p className="text-sm text-graytext leading-relaxed">
+                                        Оставьте свои контакты, и наш профильный специалист свяжется с вами в течение 15 минут.
+                                    </p>
+                                </div>
+
+                                {modal.p && (
+                                    <div className="bg-base p-4 rounded-xl mb-6 border border-neutral/50 flex items-center gap-4">
+                                        <div className="w-12 h-12 bg-white rounded-lg p-1 shrink-0"><SafeImage src={modal.p.imgs[0]} alt="product" className="w-full h-full object-contain mix-blend-multiply" /></div>
+                                        <div>
+                                            <span className="text-[10px] uppercase font-bold text-graytext block mb-0.5">Интересующий товар</span>
+                                            <span className="font-bold text-brand text-sm line-clamp-1">{modal.p.name}</span>
+                                        </div>
+                                    </div>
+                                )}
+                                
+                                <form onSubmit={(e)=>{
+                                    e.preventDefault(); 
+                                    alert('Заявка успешно отправлена! Скоро мы с вами свяжемся.'); 
+                                    setModal(null);
+                                }}>
+                                    <div className="space-y-4 mb-8">
+                                        <InputField 
+                                            label={modal.t === 'quote' ? "Название клиники / Компании" : "Ваше Имя"} 
+                                            placeholder={modal.t === 'quote' ? 'ТОО "Медицина"' : 'Иван'} 
+                                            required 
+                                        />
+                                        <InputField 
+                                            label="Контактный телефон" 
+                                            type="tel" 
+                                            placeholder="+7 (___) ___-__-__" 
+                                            required 
+                                        />
+                                        {modal.t === 'question' && (
+                                            <div>
+                                                <label className="text-xs font-bold text-graytext uppercase tracking-wider block mb-1.5">Ваш вопрос</label>
+                                                <textarea required rows="3" className="w-full p-3.5 bg-white border border-neutral rounded-xl focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all shadow-sm resize-none"></textarea>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <Button type="submit" className="w-full py-4 text-lg shadow-xl shadow-accent/30">
+                                        Отправить заявку
+                                    </Button>
+                                    <p className="text-[10px] text-center text-graytext mt-4 mx-auto max-w-[250px]">
+                                        Нажимая кнопку, вы соглашаетесь с обработкой персональных данных.
+                                    </p>
+                                </form>
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         };
-        const root = ReactDOM.createRoot(document.getElementById('root')); root.render(<App />);
+        
+        // Render App
+        const root = ReactDOM.createRoot(document.getElementById('root')); 
+        root.render(<App />);
     </script>
 </body>
 </html>
