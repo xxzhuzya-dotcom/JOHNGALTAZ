@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JOHNGALTAZ | Каталог</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: '#0B1416',
+                        accent: '#F85C58',
+                        base: '#F6F6F3',
+                        neutral: '#D6D6D6',
+                        graytext: '#666666'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #F6F6F3; color: #0B1416; }
+        /* Плавные переходы для интерактивности */
+        .card-transition { transition: all 0.2s ease-in-out; }
+        .card-transition:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(11, 20, 22, 0.1); }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- Mock Data ---
+        const MOCK_PRODUCTS = [
+            {
+                id: 1,
+                name: "THUNDEROBOT Zero 2024",
+                category: "laptop",
+                price: "950 000 ₸",
+                oldPrice: "1 050 000 ₸",
+                stock: "В наличии",
+                specs: ["i9-13900HX", "RTX 4070", "32GB RAM", "1TB SSD", "240Hz"],
+                image: "https://images.unsplash.com/photo-1603302576837-37561b2e2302?auto=format&fit=crop&q=80&w=400"
+            },
+            {
+                id: 2,
+                name: "Thunderobot 911X",
+                category: "laptop",
+                price: "520 000 ₸",
+                stock: "Предзаказ",
+                deliveryText: "Поставка до Алматы ~ 8 дней",
+                specs: ["i5-12450H", "RTX 3050", "16GB RAM", "512GB SSD"],
+                image: "https://images.unsplash.com/photo-1593640408182-31c70c8268f5?auto=format&fit=crop&q=80&w=400"
+            },
+            {
+                id: 3,
+                name: "Аппарат SMAS-лифтинга UltraX",
+                category: "medical",
+                price: "По запросу",
+                stock: "Под заказ",
+                specs: ["Рег. удостоверение РК", "Обучение в комплекте", "Гарантия 2 года"],
+                image: "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&q=80&w=400",
+                isB2B: true
+            }
+        ];
+
+        // --- Components ---
+
+        // 1. Header Component
+        const Header = () => (
+            <header className="bg-brand text-white sticky top-0 z-50">
+                <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+                    <div className="text-2xl font-bold tracking-wider">JOHNGALTAZ</div>
+                    <nav className="hidden md:flex gap-6 text-sm font-medium text-neutral">
+                        <a href="#" className="hover:text-white transition-colors">Ноутбуки</a>
+                        <a href="#" className="hover:text-white transition-colors">Периферия</a>
+                        <a href="#" className="hover:text-white transition-colors">Мед. оборудование</a>
+                    </nav>
+                    <div className="flex gap-4">
+                        <button className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                            <i data-lucide="search" className="w-5 h-5"></i>
+                        </button>
+                        <button className="p-2 hover:bg-white/10 rounded-full transition-colors relative">
+                            <i data-lucide="shopping-cart" className="w-5 h-5"></i>
+                            <span className="absolute top-0 right-0 bg-accent text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">2</span>
+                        </button>
+                    </div>
+                </div>
+            </header>
+        );
+
+        // 2. Product Card Component
+        const ProductCard = ({ product }) => (
+            <div className="bg-white rounded-xl p-4 card-transition flex flex-col h-full border border-neutral/50">
+                <div className="relative aspect-square mb-4 rounded-lg overflow-hidden bg-base">
+                    <img src={product.image} alt={product.name} className="object-cover w-full h-full mix-blend-multiply" />
+                    {product.oldPrice && (
+                        <span className="absolute top-2 left-2 bg-accent text-white text-xs font-bold px-2 py-1 rounded">Акция</span>
+                    )}
+                </div>
+                
+                <div className="flex-1">
+                    <h3 className="font-semibold text-brand text-lg leading-tight mb-2">{product.name}</h3>
+                    
+                    {/* Тэги характеристик */}
+                    <div className="flex flex-wrap gap-1 mb-3">
+                        {product.specs.map((spec, i) => (
+                            <span key={i} className="bg-base text-graytext text-[11px] px-2 py-1 rounded-md border border-neutral">
+                                {spec}
+                            </span>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-base">
+                    {/* Статус наличия по ТЗ */}
+                    <div className={`text-xs mb-2 font-medium ${product.stock === 'В наличии' ? 'text-green-600' : 'text-orange-500'}`}>
+                        {product.stock} {product.deliveryText && <span className="block text-graytext font-normal mt-0.5">{product.deliveryText}</span>}
+                    </div>
+                    
+                    <div className="flex items-end justify-between mb-4">
+                        <div>
+                            {product.oldPrice && <div className="text-graytext line-through text-sm">{product.oldPrice}</div>}
+                            <div className="text-brand font-bold text-xl">{product.price}</div>
+                        </div>
+                    </div>
+
+                    {/* Разная логика кнопок для B2C (ноутбуки) и B2B (мед. оборудование) */}
+                    {product.isB2B ? (
+                        <button className="w-full py-2.5 border-2 border-brand text-brand font-medium rounded-lg hover:bg-brand hover:text-white transition-colors">
+                            Запросить КП
+                        </button>
+                    ) : (
+                        <div className="flex gap-2">
+                            <button className="flex-1 py-2.5 bg-accent text-white font-medium rounded-lg hover:brightness-110 transition-all">
+                                В корзину
+                            </button>
+                            <button className="p-2.5 border border-neutral rounded-lg hover:bg-base transition-colors text-brand" title="В избранное">
+                                <i data-lucide="heart" className="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+
+        // 3. Floating Action Button (WhatsApp)
+        const FloatingContact = () => (
+            <a href="#" className="fixed bottom-6 right-6 bg-green-500 text-white p-4 rounded-full shadow-lg hover:scale-110 transition-transform z-50 flex items-center justify-center">
+                <i data-lucide="message-circle" className="w-6 h-6"></i>
+            </a>
+        );
+
+        // 4. Main App Layout
+        const App = () => {
+            useEffect(() => {
+                // Initialize Lucide icons after render
+                lucide.createIcons();
+            });
+
+            return (
+                <div className="min-h-screen flex flex-col font-sans">
+                    <Header />
+                    
+                    <main className="flex-1 max-w-7xl mx-auto px-4 py-8 w-full flex gap-8">
+                        {/* Sidebar Filters (Схематично) */}
+                        <aside className="w-64 hidden lg:block shrink-0">
+                            <div className="bg-white p-5 rounded-xl border border-neutral/50 sticky top-24">
+                                <h2 className="font-bold text-lg mb-4 text-brand">Фильтры</h2>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="text-sm font-medium text-graytext mb-2 block">Цена, ₸</label>
+                                        <input type="range" className="w-full accent-accent" />
+                                    </div>
+                                    <hr className="border-base"/>
+                                    <div>
+                                        <label className="text-sm font-medium text-graytext mb-2 block">Наличие</label>
+                                        <label className="flex items-center gap-2 text-sm mb-1"><input type="checkbox" className="rounded text-accent focus:ring-accent" /> В наличии</label>
+                                        <label className="flex items-center gap-2 text-sm"><input type="checkbox" className="rounded text-accent focus:ring-accent" /> Предзаказ (8 дней)</label>
+                                    </div>
+                                    <hr className="border-base"/>
+                                    <button className="w-full py-2 bg-base text-brand text-sm font-medium rounded-lg hover:bg-neutral transition-colors">
+                                        Применить
+                                    </button>
+                                </div>
+                            </div>
+                        </aside>
+
+                        {/* Product Listing (PLP) */}
+                        <div className="flex-1">
+                            <div className="flex justify-between items-center mb-6">
+                                <h1 className="text-2xl font-bold text-brand">Игровые ноутбуки и Оборудование</h1>
+                                <select className="border border-neutral rounded-lg px-3 py-2 text-sm bg-white outline-none focus:border-accent">
+                                    <option>Сначала популярные</option>
+                                    <option>Сначала дешевле</option>
+                                    <option>Сначала дороже</option>
+                                </select>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                                {MOCK_PRODUCTS.map(product => (
+                                    <ProductCard key={product.id} product={product} />
+                                ))}
+                            </div>
+                        </div>
+                    </main>
+
+                    <FloatingContact />
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
