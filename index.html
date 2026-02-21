@@ -19,7 +19,6 @@
         .mega-menu { border-bottom: 2px solid #F85C58; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .vis-cat { border: 1px solid transparent; transition: all 0.3s ease; }
         .vis-cat:hover { border-color: #F85C58; background-color: rgba(248,92,88,0.05); }
-        /* Кастомный скроллбар */
         ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-thumb { background: #D6D6D6; border-radius: 4px; }
     </style>
 </head>
@@ -28,34 +27,36 @@
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
-        // --- MOCK DATA (Полностью покрывает ТЗ) ---
+        // --- MOCK DATA (Полное покрытие ТЗ) ---
         const DB = [
-            { id: 1, sku: "THZ24", name: "THUNDEROBOT Zero 2024", cat: "Игровые ноутбуки", brand: "Thunderobot", price: 950000, oldPrice: 1050000, stock: "В наличии", specs: { "CPU": "i9-13900HX", "GPU": "RTX 4070", "RAM": "32GB", "SSD": "1TB", "Экран": "16' 240Hz", "Частота": "240Hz" }, imgs: ["https://images.unsplash.com/photo-1603302576837-37561b2e2302?auto=format&fit=crop&q=80&w=400"], variants: { ram: [{l:"32GB", d:0}, {l:"64GB", d:80000}], ssd: [{l:"1TB", d:0}, {l:"2TB", d:45000}] }, desc: { forWhom: "Для хардкорных геймеров.", pros: "Топовое охлаждение.", box: "Ноутбук, ЗУ 300W." }, cross: [3], pop: 10, new: true },
-            { id: 2, sku: "TH911X", name: "Thunderobot 911X", cat: "Игровые ноутбуки", brand: "Thunderobot", price: 520000, stock: "Предзаказ", deliveryText: "Поставка до Алматы ~ 8 дней", specs: { "CPU": "i5-12450H", "GPU": "RTX 3050", "RAM": "16GB", "SSD": "512GB", "Экран": "15.6' 144Hz" }, imgs: ["https://images.unsplash.com/photo-1593640408182-31c70c8268f5?auto=format&fit=crop&q=80&w=400"], pop: 5, new: false },
-            { id: 3, sku: "ML903", name: "Мышь ML903 PRO", cat: "Периферия", brand: "Thunderobot", price: 35000, stock: "В наличии", specs: { "Сенсор": "PAW3395", "Вес": "65г" }, imgs: ["https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&q=80&w=400"], pop: 15, new: true },
-            { id: 4, sku: "SMAS-UX", name: "Аппарат SMAS UltraX", cat: "Медицинское оборудование", brand: "MedTech", price: 0, priceText: "По запросу", stock: "Под заказ", specs: { "Рег. уд.": "РК-МТ-001" }, imgs: ["https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&q=80&w=400"], isB2B: true, warning: "Критично: Требуется медицинская лицензия и обучение персонала. Имеются противопоказания.", docs: ["РУ_МЗ_РК.pdf", "Сертификат.pdf"], pop: 2, new: false },
-            { id: 5, sku: "LAS-CP", name: "Лазер CosmePro", cat: "Косметическое оборудование", brand: "CosmePro", price: 2500000, stock: "Предзаказ", specs: { "Мощность": "1200W", "Ресурс": "20 млн" }, imgs: ["https://images.unsplash.com/photo-1590424693955-f7035eb4e622?auto=format&fit=crop&q=80&w=400"], isB2B: true, pop: 8, new: true }
+            { id: 1, sku: "THZ24", name: "THUNDEROBOT Zero 2024", cat: "Игровые ноутбуки", brand: "Thunderobot", price: 950000, oldPrice: 1050000, stock: "В наличии", specs: { "CPU": "i9-13900HX", "GPU": "RTX 4070", "RAM": "32GB", "SSD": "1TB", "Экран": "16' 240Hz" }, imgs: ["https://images.unsplash.com/photo-1603302576837-37561b2e2302?auto=format&fit=crop&q=80&w=400"], variants: { ram: [{l:"32GB", d:0}, {l:"64GB", d:80000}], ssd: [{l:"1TB", d:0}, {l:"2TB", d:45000}] }, desc: { forWhom: "Для хардкорных геймеров и 3D-дизайнеров.", pros: "Топовое охлаждение, 240Hz.", box: "Ноутбук, ЗУ 300W, документация." }, cross: [3], pop: 100, new: true },
+            { id: 2, sku: "TH911X", name: "Thunderobot 911X", cat: "Игровые ноутбуки", brand: "Thunderobot", price: 520000, stock: "Предзаказ", deliveryText: "Поставка до Алматы ~ 8 дней", specs: { "CPU": "i5-12450H", "GPU": "RTX 3050", "RAM": "16GB", "SSD": "512GB", "Экран": "15.6' 144Hz" }, imgs: ["https://images.unsplash.com/photo-1593640408182-31c70c8268f5?auto=format&fit=crop&q=80&w=400"], variants: { ram: [{l:"16GB", d:0}, {l:"32GB", d:40000}], ssd: [{l:"512GB", d:0}, {l:"1TB", d:25000}] }, desc: { forWhom: "Для начинающих геймеров.", pros: "Оптимальное соотношение цена/качество.", box: "Ноутбук, ЗУ 150W." }, cross: [3], pop: 80, new: false },
+            { id: 3, sku: "ML903", name: "Мышь ML903 PRO", cat: "Периферия", brand: "Thunderobot", price: 35000, stock: "В наличии", specs: { "Сенсор": "PAW3395", "Вес": "65г", "DPI": "26000" }, imgs: ["https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&q=80&w=400"], pop: 150, new: true },
+            { id: 4, sku: "SMAS-UX", name: "Аппарат SMAS UltraX", cat: "Медицинское оборудование", brand: "MedTech", price: 0, priceText: "По запросу", stock: "Под заказ", specs: { "Рег. уд.": "РК-МТ-001", "Ресурс": "20 000 линий" }, imgs: ["https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&q=80&w=400"], isB2B: true, warning: "КРИТИЧНО: Требуется медицинская лицензия и профильное образование специалиста. Имеются противопоказания.", docs: ["РУ_МЗ_РК.pdf", "Сертификат_СМК.pdf", "Инструкция.pdf"], pop: 20, new: false },
+            { id: 5, sku: "LAS-CP", name: "Лазер CosmePro", cat: "Косметическое оборудование", brand: "CosmePro", price: 2500000, stock: "Предзаказ", deliveryText: "Поставка ~ 14 дней", specs: { "Мощность": "1200W", "Охлаждение": "Сапфировое" }, imgs: ["https://images.unsplash.com/photo-1590424693955-f7035eb4e622?auto=format&fit=crop&q=80&w=400"], isB2B: true, pop: 40, new: true },
+            { id: 6, sku: "CM-BP", name: "Кофемашина Barista Pro", cat: "Мелко-бытовая техника", brand: "HomeTech", price: 180000, stock: "В наличии", specs: { "Тип": "Рожковая", "Давление": "15 бар" }, imgs: ["https://images.unsplash.com/photo-1517246286411-8bb31bf32f22?auto=format&fit=crop&q=80&w=400"], pop: 60, new: false }
         ];
 
         const CATS = [
             { id: "Игровые ноутбуки", img: "https://images.unsplash.com/photo-1603302576837-37561b2e2302?auto=format&fit=crop&q=80&w=300", sub: "Мощные решения" },
             { id: "Периферия", img: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&q=80&w=300", sub: "Мыши, клавиатуры" },
-            { id: "Косметическое оборудование", img: "https://images.unsplash.com/photo-1590424693955-f7035eb4e622?auto=format&fit=crop&q=80&w=300", sub: "Для салонов" },
-            { id: "Медицинское оборудование", img: "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&q=80&w=300", sub: "С лицензией" }
+            { id: "Косметическое оборудование", img: "https://images.unsplash.com/photo-1590424693955-f7035eb4e622?auto=format&fit=crop&q=80&w=300", sub: "Для салонов красоты" },
+            { id: "Медицинское оборудование", img: "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&q=80&w=300", sub: "Спец. оборудование" },
+            { id: "Мелко-бытовая техника", img: "https://images.unsplash.com/photo-1517246286411-8bb31bf32f22?auto=format&fit=crop&q=80&w=300", sub: "Для дома и офиса" }
         ];
 
-        // --- COMPONENTS ---
+        // --- UI COMPONENTS ---
         const Btn = ({ children, v='pri', cls='', ...p }) => {
             const s = { pri: "bg-accent text-white hover:brightness-110 shadow-sm", sec: "border-2 border-brand text-brand hover:bg-brand hover:text-white", out: "border border-neutral text-brand hover:bg-neutral/30", ghost: "text-graytext hover:text-brand" };
             return <button className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${s[v]} ${cls}`} {...p}>{children}</button>;
         };
 
         const App = () => {
+            // Router & Global State
             const [view, setView] = useState('home');
             const [hist, setHist] = useState(['home']);
             const [activeP, setActiveP] = useState(null);
             
-            // Global States
             const [cart, setCart] = useState([]);
             const [comp, setComp] = useState([]);
             const [favs, setFavs] = useState([]);
@@ -65,28 +66,33 @@
 
             // Filters State
             const [catF, setCatF] = useState('Все');
+            const [brandF, setBrandF] = useState('');
             const [sort, setSort] = useState('pop');
             const [priceR, setPriceR] = useState(3000000);
             const [inStock, setInStock] = useState(false);
+            const [fCpu, setFCpu] = useState('');
+            const [fGpu, setFGpu] = useState('');
+            const [fRam, setFRam] = useState('');
+            const [fSsd, setFSsd] = useState('');
 
             const fmtP = p => p===0 ? "По запросу" : new Intl.NumberFormat('ru-KZ').format(p) + ' ₸';
             
             const nav = (v, data=null) => { window.scrollTo(0,0); if(data) setActiveP(data); setHist(h=>[...h, v]); setView(v); setMenu(false); };
             const goBack = () => { if(hist.length>1) { const nh=[...hist]; nh.pop(); setHist(nh); setView(nh[nh.length-1]); } else nav('home'); };
             
-            const toCart = (p, qty=1, vStr="", fPrice=p.price) => { setCart([...cart, {...p, qty, finalP: fPrice, variant: vStr}]); alert('Добавлено в корзину'); };
+            const toCart = (p, qty=1, vStr="", fPrice=p.price) => { setCart([...cart, {...p, qty, finalP: fPrice, variant: vStr}]); alert('Товар добавлен в корзину'); };
             const toggleFav = (p) => setFavs(pr => pr.find(x=>x.id===p.id) ? pr.filter(x=>x.id!==p.id) : [...pr, p]);
             const toggleComp = (p) => setComp(pr => { if(pr.find(x=>x.id===p.id)) return pr.filter(x=>x.id!==p.id); if(pr.length>=4) { alert('Максимум 4 товара для сравнения'); return pr; } return [...pr, p]; });
 
             useEffect(() => { lucide.createIcons(); });
 
-            // --- HEADER (THUNDEROBOT MEGA-MENU STYLE) ---
+            // --- HEADER (THUNDEROBOT MEGA-MENU) ---
             const Header = () => (
                 <header className="bg-[#070D0E] text-white sticky top-0 z-50">
                     <div className="border-b border-graytext/20 text-[11px] hidden md:block">
                         <div className="max-w-7xl mx-auto px-4 py-2 flex justify-between text-neutral">
-                            <div className="flex gap-4"><span className="text-accent"><i data-lucide="map-pin" className="w-3 h-3 inline"></i> Казахстан</span><span><i data-lucide="truck" className="w-3 h-3 inline"></i> Доставка 1-8 дней</span></div>
-                            <div className="flex gap-4"><button onClick={()=>nav('info')} className="hover:text-white">Гарантия и возврат</button><button onClick={()=>nav('info')} className="hover:text-white">B2B Клиентам</button><span>8 800 123 45 67</span></div>
+                            <div className="flex gap-4"><span className="text-accent"><i data-lucide="map-pin" className="w-3 h-3 inline"></i> Казахстан</span><span><i data-lucide="truck" className="w-3 h-3 inline"></i> СДЭК, Казпочта, Курьер</span></div>
+                            <div className="flex gap-4"><button onClick={()=>nav('info')} className="hover:text-white">Гарантия и возврат</button><button onClick={()=>nav('b2b')} className="hover:text-white">B2B Клиентам</button><span>8 800 123 45 67</span></div>
                         </div>
                     </div>
                     
@@ -98,26 +104,26 @@
                         
                         <nav className="hidden lg:flex gap-8 text-xs font-bold items-center h-full uppercase tracking-wider">
                             <button className="hover:text-accent transition-colors" onClick={()=>nav('home')}>Главная</button>
-                            {/* МЕГА МЕНЮ */}
                             <div className="group py-4 relative">
                                 <button className="hover:text-accent transition-colors flex items-center gap-1" onClick={()=>{setCatF('Все'); nav('catalog');}}>Каталог <i data-lucide="chevron-down" className="w-3 h-3"></i></button>
-                                <div className="absolute top-[50px] -left-32 w-[900px] bg-[#0B1416] mega-menu opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 p-6 z-50 rounded-b-xl">
-                                    <div className="grid grid-cols-4 gap-6">
+                                <div className="absolute top-[50px] -left-32 w-[950px] bg-[#0B1416] mega-menu opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 p-6 z-50 rounded-b-xl">
+                                    <div className="grid grid-cols-5 gap-4">
                                         {CATS.map(c => (
                                             <div key={c.id} onClick={()=>{setCatF(c.id); nav('catalog');}} className="bg-[#111A1C] rounded-xl p-4 cursor-pointer vis-cat flex flex-col items-center text-center">
-                                                <img src={c.img} className="h-28 w-auto object-cover mb-4 mix-blend-screen drop-shadow-2xl" />
-                                                <span className="text-accent text-[10px] mb-1">{c.sub}</span>
-                                                <span className="font-bold text-sm">{c.id}</span>
+                                                <img src={c.img} className="h-24 w-auto object-cover mb-4 mix-blend-screen drop-shadow-2xl" />
+                                                <span className="text-accent text-[9px] mb-1">{c.sub}</span>
+                                                <span className="font-bold text-xs">{c.id}</span>
                                             </div>
                                         ))}
                                     </div>
                                 </div>
                             </div>
-                            <button className="hover:text-accent" onClick={()=>nav('info')}>О Компании</button>
+                            <button className="hover:text-accent" onClick={()=>nav('info')}>Информация</button>
+                            <button className="hover:text-accent text-accent" onClick={()=>nav('b2b')}>Для Юр. Лиц</button>
                         </nav>
 
                         <div className="flex-1 max-w-xs hidden md:block relative">
-                            <input type="text" placeholder="Поиск товара..." value={search} onChange={e=>{setSearch(e.target.value); if(view!=='catalog') nav('catalog');}} className="w-full bg-[#111A1C] border border-graytext/30 rounded-full px-4 py-1.5 outline-none focus:border-accent text-sm text-white" />
+                            <input type="text" placeholder="Поиск (напр: RTX 4070)..." value={search} onChange={e=>{setSearch(e.target.value); if(view!=='catalog') nav('catalog');}} className="w-full bg-[#111A1C] border border-graytext/30 rounded-full px-4 py-1.5 outline-none focus:border-accent text-sm text-white" />
                             <i data-lucide="search" className="absolute right-3 top-2 w-4 h-4 text-graytext"></i>
                         </div>
 
@@ -127,32 +133,38 @@
                             <button onClick={()=>nav('cart')} className="relative hover:text-accent"><i data-lucide="shopping-cart" className="w-5 h-5"></i>{cart.length>0 && <span className="absolute -top-1.5 -right-2 bg-accent text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">{cart.reduce((a,c)=>a+c.qty,0)}</span>}</button>
                         </div>
                     </div>
-                    {menu && <div className="md:hidden bg-brand p-4 flex flex-col gap-4 border-t border-graytext"><input type="text" placeholder="Поиск..." value={search} onChange={e=>{setSearch(e.target.value); nav('catalog');}} className="w-full bg-[#1A2528] rounded p-2 text-white" /><button onClick={()=>nav('catalog')} className="text-left font-bold">Каталог</button></div>}
+                    {menu && <div className="md:hidden bg-brand p-4 flex flex-col gap-4 border-t border-graytext"><input type="text" placeholder="Поиск..." value={search} onChange={e=>{setSearch(e.target.value); nav('catalog');}} className="w-full bg-[#1A2528] rounded p-2 text-white" /><button onClick={()=>nav('catalog')} className="text-left font-bold">Каталог</button><button onClick={()=>nav('b2b')} className="text-left font-bold text-accent">B2B Раздел</button></div>}
                 </header>
             );
 
             const TopBar = () => <div className="mb-6">{view!=='home' && <Btn v="ghost" cls="p-0 flex items-center gap-1" onClick={goBack}><i data-lucide="arrow-left" className="w-4 h-4"></i> Назад</Btn>}</div>;
 
-            // --- REUSABLE PRODUCT CARD (PLP) ---
+            // --- PRODUCT CARD (PLP) WITH 4 ACTIONS (Скрин 3, 4.2) ---
             const ProdCard = ({ p }) => (
-                <div className="bg-white rounded-xl p-4 card-t flex flex-col border border-neutral relative group">
+                <div className="bg-white rounded-xl p-4 card-t flex flex-col border border-neutral relative group h-full">
                     {p.oldPrice && <span className="absolute top-2 left-2 z-10 bg-accent text-white text-[10px] uppercase px-2 py-1 rounded font-bold">Акция</span>}
                     <div className="relative aspect-square mb-4 bg-base rounded-lg overflow-hidden cursor-pointer" onClick={()=>nav('pdp', p)}>
                         <img src={p.imgs[0]} className="w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transition-transform" />
                         <div className="absolute top-2 right-2 flex flex-col gap-2">
-                            <button onClick={(e)=>{e.stopPropagation(); toggleFav(p);}} title="В избранное" className={`p-2 bg-white rounded-full shadow ${favs.find(x=>x.id===p.id)?'text-accent':'text-graytext'}`}><i data-lucide="heart" className={`w-4 h-4 ${favs.find(x=>x.id===p.id)?'fill-current':''}`}></i></button>
-                            <button onClick={(e)=>{e.stopPropagation(); toggleComp(p);}} title="Сравнить" className={`p-2 bg-white rounded-full shadow ${comp.find(x=>x.id===p.id)?'text-brand':'text-graytext'}`}><i data-lucide="bar-chart-2" className="w-4 h-4"></i></button>
+                            <button onClick={(e)=>{e.stopPropagation(); toggleFav(p);}} title="В избранное" className={`p-2 bg-white rounded-full shadow ${favs.find(x=>x.id===p.id)?'text-accent':'text-graytext hover:text-brand'}`}><i data-lucide="heart" className={`w-4 h-4 ${favs.find(x=>x.id===p.id)?'fill-current':''}`}></i></button>
+                            <button onClick={(e)=>{e.stopPropagation(); toggleComp(p);}} title="Сравнить" className={`p-2 bg-white rounded-full shadow ${comp.find(x=>x.id===p.id)?'text-brand':'text-graytext hover:text-brand'}`}><i data-lucide="bar-chart-2" className="w-4 h-4"></i></button>
                         </div>
                     </div>
                     <h3 className="font-bold text-brand hover:text-accent flex-1 text-sm cursor-pointer" onClick={()=>nav('pdp', p)}>{p.name}</h3>
-                    <div className="flex flex-wrap gap-1 my-2">{Object.values(p.specs||{}).slice(0,3).map((s,i)=><span key={i} className="text-[10px] bg-base px-1.5 py-0.5 rounded text-graytext border border-neutral/50">{s}</span>)}</div>
+                    
+                    {/* Короткие ключевые характеристики */}
+                    <div className="flex flex-wrap gap-1 my-2 min-h-[44px] content-start">{Object.values(p.specs||{}).slice(0,4).map((s,i)=><span key={i} className="text-[10px] bg-base px-1.5 py-0.5 rounded text-graytext border border-neutral/50">{s}</span>)}</div>
+                    
                     <div className={`text-[11px] mb-2 font-bold ${p.stock==='В наличии'?'text-green-600':'text-orange-500'}`}>{p.stock}</div>
+                    
                     <div className="mb-4">
                         {p.oldPrice && <div className="text-xs text-graytext line-through">{fmtP(p.oldPrice)}</div>}
                         <div className="text-lg font-bold">{p.priceText || fmtP(p.price)}</div>
                     </div>
-                    <div className="flex gap-2">
-                        {p.isB2B ? <Btn v="sec" cls="w-full text-xs py-2" onClick={()=>setModal({t:'quote', p})}>Запросить КП</Btn> : <><Btn cls="flex-1 text-xs py-2" onClick={()=>toCart(p)}>В корзину</Btn><Btn v="out" cls="text-xs px-2" onClick={()=>setModal({t:'1click', p})} title="Купить в 1 клик"><i data-lucide="zap" className="w-4 h-4"></i></Btn></>}
+
+                    {/* Кнопки действий PLP */}
+                    <div className="flex gap-2 mt-auto">
+                        {p.isB2B ? <Btn v="sec" cls="w-full text-xs py-2" onClick={()=>setModal({t:'quote', p})}>Запросить КП</Btn> : <><Btn cls="flex-1 text-xs py-2 px-0" onClick={()=>toCart(p)}>В корзину</Btn><Btn v="out" cls="flex-1 text-xs py-2 px-0" onClick={()=>setModal({t:'1click', p})}>В 1 клик</Btn></>}
                     </div>
                 </div>
             );
@@ -161,7 +173,7 @@
             const Home = () => (
                 <div className="fade-in space-y-12">
                     <div className="bg-[#070D0E] text-white rounded-2xl p-10 lg:p-16 relative overflow-hidden flex items-center justify-center text-center">
-                        <div className="relative z-10"><h1 className="text-4xl md:text-5xl font-bold mb-4 uppercase tracking-widest">Будущее технологий</h1><p className="text-graytext mb-8 max-w-xl mx-auto">Ноутбуки, периферия и медоборудование с гарантией.</p><Btn cls="px-8 py-3 mx-auto" onClick={()=>{setCatF('Все'); nav('catalog');}}>Перейти в каталог</Btn></div>
+                        <div className="relative z-10"><h1 className="text-4xl md:text-5xl font-bold mb-4 uppercase tracking-widest">Будущее технологий</h1><p className="text-graytext mb-8 max-w-xl mx-auto">Ноутбуки, периферия и профессиональное B2B оборудование с гарантией.</p><Btn cls="px-8 py-3 mx-auto" onClick={()=>{setCatF('Все'); nav('catalog');}}>Перейти в каталог</Btn></div>
                         <div className="absolute inset-0 bg-gradient-to-t from-brand to-transparent opacity-80 z-0"></div>
                     </div>
                     <div><h2 className="text-2xl font-bold mb-6">Хиты продаж</h2><div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">{DB.slice(0,4).map(p => <ProdCard key={p.id} p={p} />)}</div></div>
@@ -169,11 +181,19 @@
             );
 
             const Catalog = () => {
-                const [gpu, setGpu] = useState('');
-                const [cpu, setCpu] = useState('');
-                
-                // Sorting Logic
-                let res = DB.filter(p => (catF==='Все' || p.cat===catF) && p.name.toLowerCase().includes(search.toLowerCase()) && (gpu==='' || p.specs?.GPU?.includes(gpu)) && (cpu==='' || p.specs?.CPU?.includes(cpu)) && p.price <= priceR && (!inStock || p.stock==='В наличии'));
+                // Скрин 4: Фильтры (Цена, Бренд, Наличие, CPU, GPU, RAM, SSD, Сортировка)
+                let res = DB.filter(p => 
+                    (catF==='Все' || p.cat===catF) && 
+                    p.name.toLowerCase().includes(search.toLowerCase()) && 
+                    (brandF==='' || p.brand===brandF) &&
+                    (fGpu==='' || p.specs?.GPU?.includes(fGpu)) && 
+                    (fCpu==='' || p.specs?.CPU?.includes(fCpu)) && 
+                    (fRam==='' || p.specs?.RAM?.includes(fRam)) && 
+                    (fSsd==='' || p.specs?.SSD?.includes(fSsd)) && 
+                    p.price <= priceR && 
+                    (!inStock || p.stock==='В наличии')
+                );
+
                 if(sort==='pop') res.sort((a,b)=>b.pop - a.pop);
                 if(sort==='cheap') res.sort((a,b)=>a.price - b.price);
                 if(sort==='new') res.sort((a,b)=> (a.new===b.new)?0:a.new?-1:1);
@@ -182,33 +202,37 @@
                     <div className="flex flex-col lg:flex-row gap-8 fade-in">
                         <aside className="w-full lg:w-64 shrink-0 bg-white p-5 rounded-xl border border-neutral h-fit lg:sticky top-24">
                             <TopBar />
-                            <h2 className="font-bold mb-4">Фильтры</h2>
-                            <div className="mb-6 space-y-3">
-                                <label className="flex items-center text-sm"><input type="checkbox" checked={inStock} onChange={e=>setInStock(e.target.checked)} className="mr-2 accent-accent"/> Только в наличии</label>
-                            </div>
-                            
-                            <div className="mb-6 border-t border-neutral pt-4">
-                                <h3 className="font-bold mb-2 text-sm">Цена до: {fmtP(priceR)}</h3>
-                                <input type="range" min="0" max="3000000" step="50000" value={priceR} onChange={e=>setPriceR(e.target.value)} className="w-full accent-accent" />
+                            <h2 className="font-bold mb-4">Категории</h2>
+                            <div className="space-y-2 mb-6 border-b border-neutral pb-4">
+                                {['Все', ...CATS.map(c=>c.id)].map(c => <label key={c} className="flex items-center text-sm cursor-pointer"><input type="radio" checked={catF===c} onChange={()=>setCatF(c)} className="mr-3 text-accent accent-accent"/>{c}</label>)}
                             </div>
 
+                            <h2 className="font-bold mb-4">Фильтры</h2>
+                            <div className="space-y-4 mb-6">
+                                <div><h3 className="text-xs text-graytext mb-1">Бренд</h3><select className="w-full border rounded p-2 text-sm" value={brandF} onChange={e=>setBrandF(e.target.value)}><option value="">Все бренды</option><option value="Thunderobot">Thunderobot</option><option value="MedTech">MedTech</option><option value="CosmePro">CosmePro</option></select></div>
+                                <div><h3 className="text-xs text-graytext mb-1">Цена до: {fmtP(priceR)}</h3><input type="range" min="0" max="3000000" step="50000" value={priceR} onChange={e=>setPriceR(e.target.value)} className="w-full accent-accent" /></div>
+                                <label className="flex items-center text-sm cursor-pointer"><input type="checkbox" checked={inStock} onChange={e=>setInStock(e.target.checked)} className="mr-2 accent-accent"/> Только в наличии</label>
+                            </div>
+                            
                             {catF === 'Игровые ноутбуки' && (
                                 <div className="mt-4 pt-4 border-t border-neutral space-y-4">
-                                    <div><h3 className="font-bold mb-2 text-sm">GPU</h3><select className="w-full border rounded-lg p-2 text-sm" onChange={e=>setGpu(e.target.value)}><option value="">Все</option><option value="RTX 3050">RTX 3050</option><option value="RTX 4070">RTX 4070</option></select></div>
-                                    <div><h3 className="font-bold mb-2 text-sm">CPU</h3><select className="w-full border rounded-lg p-2 text-sm" onChange={e=>setCpu(e.target.value)}><option value="">Все</option><option value="i5">Intel i5</option><option value="i9">Intel i9</option></select></div>
+                                    <div><h3 className="text-xs text-graytext mb-1">Процессор (CPU)</h3><select className="w-full border rounded p-2 text-sm" onChange={e=>setFCpu(e.target.value)}><option value="">Все</option><option value="i5">Intel i5</option><option value="i9">Intel i9</option></select></div>
+                                    <div><h3 className="text-xs text-graytext mb-1">Видеокарта (GPU)</h3><select className="w-full border rounded p-2 text-sm" onChange={e=>setFGpu(e.target.value)}><option value="">Все</option><option value="RTX 3050">RTX 3050</option><option value="RTX 4070">RTX 4070</option></select></div>
+                                    <div><h3 className="text-xs text-graytext mb-1">RAM</h3><select className="w-full border rounded p-2 text-sm" onChange={e=>setFRam(e.target.value)}><option value="">Все</option><option value="16GB">16GB</option><option value="32GB">32GB</option></select></div>
+                                    <div><h3 className="text-xs text-graytext mb-1">SSD</h3><select className="w-full border rounded p-2 text-sm" onChange={e=>setFSsd(e.target.value)}><option value="">Все</option><option value="512GB">512GB</option><option value="1TB">1TB</option></select></div>
                                 </div>
                             )}
-                            <Btn v="out" cls="w-full mt-6 text-xs" onClick={()=>setModal({t:'form'})}>Сложный подбор</Btn>
                         </aside>
 
                         <div className="flex-1">
                             <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-                                <div><h1 className="text-2xl font-bold">{catF}</h1><span className="text-sm text-graytext">Товаров: {res.length}</span></div>
-                                <select className="border border-neutral rounded-lg p-2 text-sm bg-white outline-none focus:border-accent" value={sort} onChange={e=>setSort(e.target.value)}>
-                                    <option value="pop">Сначала популярные</option><option value="cheap">Сначала дешевые</option><option value="new">Сначала новинки</option>
-                                </select>
+                                <div><h1 className="text-2xl font-bold">{catF}</h1><span className="text-sm text-graytext">Найдено товаров: {res.length}</span></div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-sm text-graytext">Сортировка:</span>
+                                    <select className="border border-neutral rounded-lg p-2 text-sm bg-white outline-none focus:border-accent" value={sort} onChange={e=>setSort(e.target.value)}><option value="pop">Популярные</option><option value="cheap">Сначала дешевые</option><option value="new">Новинки</option></select>
+                                </div>
                             </div>
-                            {res.length ? <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">{res.map(p => <ProdCard key={p.id} p={p} />)}</div> : <div className="text-center py-20 bg-white rounded-xl">Ничего не найдено по фильтрам</div>}
+                            {res.length ? <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">{res.map(p => <ProdCard key={p.id} p={p} />)}</div> : <div className="text-center py-20 bg-white rounded-xl text-graytext">Ничего не найдено по заданным фильтрам. Попробуйте сбросить параметры.</div>}
                         </div>
                     </div>
                 );
@@ -216,61 +240,84 @@
 
             const PDP = () => {
                 const p = activeP;
+                const [iIdx, setIIdx] = useState(0);
                 const [r, setR] = useState(p.variants?.ram[0]);
                 const [s, setS] = useState(p.variants?.ssd[0]);
+                
                 const curP = p.basePrice ? (p.price + (r?.d||0) + (s?.d||0)) : 0;
-                const dSKU = `${p.sku}${r?'-'+r.l:''}${s?'-'+s.l:''}`; // Динамический SKU
+                const dSKU = `${p.sku}${r?'-'+r.l:''}${s?'-'+s.l:''}`; // Скрин 5: При выборе варианта меняются артикул/цена
+                const isAvail = p.stock === 'В наличии';
 
                 return (
                     <div className="fade-in">
                         <TopBar />
                         <div className="bg-white p-6 md:p-10 rounded-xl border border-neutral mb-8">
                             <div className="grid md:grid-cols-2 gap-10">
-                                <div><div className="aspect-square bg-base rounded-xl overflow-hidden mb-4"><img src={p.imgs[0]} className="w-full h-full object-cover mix-blend-multiply" /></div></div>
+                                <div>
+                                    <div className="aspect-square bg-base rounded-xl overflow-hidden mb-4"><img src={p.imgs[iIdx]} className="w-full h-full object-cover mix-blend-multiply" /></div>
+                                    {p.imgs.length>1 && <div className="flex gap-2">{p.imgs.map((im, i) => <img key={i} src={im} onClick={()=>setIIdx(i)} className={`w-16 h-16 rounded border-2 cursor-pointer ${iIdx===i?'border-accent':'border-transparent'}`} />)}</div>}
+                                </div>
                                 <div>
                                     <h1 className="text-3xl font-bold mb-2">{p.name}</h1>
-                                    <div className="text-sm text-graytext mb-4">Артикул (SKU): {dSKU}</div>
-                                    <div className={`inline-block px-3 py-1 rounded-full text-xs font-bold mb-6 ${p.stock==='В наличии'?'bg-green-100 text-green-700':'bg-orange-100 text-orange-700'}`}>{p.stock} {p.stock==='Предзаказ'&&`(${p.deliveryText})`}</div>
+                                    <div className="flex items-center justify-between mb-4 text-sm">
+                                        <span className="text-graytext">Артикул / SKU: <span className="font-mono text-brand">{dSKU}</span></span>
+                                        <span className="text-graytext">Бренд: <span className="font-bold">{p.brand}</span></span>
+                                    </div>
+                                    
+                                    <div className={`inline-block px-3 py-1 rounded-full text-xs font-bold mb-6 ${isAvail?'bg-green-100 text-green-700':'bg-orange-100 text-orange-700'}`}>{p.stock} {!isAvail && p.deliveryText && `(${p.deliveryText})`}</div>
+                                    
                                     <div className="text-4xl font-bold text-brand mb-8">{p.priceText || fmtP(curP)}</div>
                                     
                                     {p.variants && (
                                         <div className="mb-8 space-y-4">
-                                            <div><span className="text-sm font-bold block mb-2">RAM:</span> <div className="flex gap-2">{p.variants.ram.map(v=><Btn key={v.l} v={r.l===v.l?'sec':'out'} cls="py-1 px-3 text-sm" onClick={()=>setR(v)}>{v.l}</Btn>)}</div></div>
-                                            <div><span className="text-sm font-bold block mb-2">SSD:</span> <div className="flex gap-2">{p.variants.ssd.map(v=><Btn key={v.l} v={s.l===v.l?'sec':'out'} cls="py-1 px-3 text-sm" onClick={()=>setS(v)}>{v.l}</Btn>)}</div></div>
+                                            <div><span className="text-sm font-bold block mb-2">Объем RAM:</span> <div className="flex gap-2">{p.variants.ram.map(v=><Btn key={v.l} v={r.l===v.l?'sec':'out'} cls="py-1 px-3 text-sm" onClick={()=>setR(v)}>{v.l}</Btn>)}</div></div>
+                                            <div><span className="text-sm font-bold block mb-2">Накопитель SSD:</span> <div className="flex gap-2">{p.variants.ssd.map(v=><Btn key={v.l} v={s.l===v.l?'sec':'out'} cls="py-1 px-3 text-sm" onClick={()=>setS(v)}>{v.l}</Btn>)}</div></div>
                                         </div>
                                     )}
 
-                                    {p.warning && <div className="bg-orange-50 text-orange-800 p-4 rounded-lg mb-6 text-sm border border-orange-200">⚠️ {p.warning}</div>}
-                                    {p.docs && <div className="mb-6"><span className="text-sm font-bold block mb-2">Документы:</span>{p.docs.map(d=><a key={d} href="#" className="flex items-center gap-2 text-accent text-sm hover:underline"><i data-lucide="file-text" className="w-4 h-4"></i>{d}</a>)}</div>}
+                                    {/* Скрин 5: Отдельный блок "Важно/Предупреждение" */}
+                                    {p.warning && <div className="bg-orange-50 text-orange-800 p-4 rounded-lg mb-6 text-sm border border-orange-200 flex items-start gap-2"><i data-lucide="alert-triangle" className="w-5 h-5 shrink-0"></i>{p.warning}</div>}
+                                    {p.docs && <div className="mb-6"><span className="text-sm font-bold block mb-2">Документы и Сертификаты:</span>{p.docs.map(d=><a key={d} href="#" className="flex items-center gap-2 text-accent text-sm mb-1 hover:underline"><i data-lucide="file-text" className="w-4 h-4"></i>{d}</a>)}</div>}
                                     
-                                    <div className="flex flex-col gap-3 mb-6">
-                                        {p.isB2B ? <Btn cls="py-4 text-lg" onClick={()=>setModal({t:'quote', p})}>Запросить КП</Btn> : <><Btn cls="py-4 text-lg" onClick={()=>toCart(p, 1, `${r?.l||''} ${s?.l||''}`, curP)}>Добавить в корзину</Btn><Btn v="sec" onClick={()=>{toCart(p, 1, `${r?.l||''} ${s?.l||''}`, curP); nav('checkout');}}>Купить сейчас</Btn></>}
-                                        <div className="flex gap-3"><Btn v="out" cls="flex-1" onClick={()=>setModal({t:'1click', p})}>Купить в 1 клик</Btn><Btn v="ghost" cls="flex-1 border border-transparent hover:border-neutral" onClick={()=>setModal({t:'question', p})}>Задать вопрос</Btn></div>
+                                    {/* Скрин 4.3: Кнопки «В корзину», «Купить сейчас», «В 1 клик», «Задать вопрос» */}
+                                    <div className="flex flex-col gap-3 mb-6 pb-6 border-b border-neutral">
+                                        {p.isB2B ? <Btn cls="py-4 text-lg" onClick={()=>setModal({t:'quote', p})}>Запросить КП</Btn> : <><div className="flex gap-3"><Btn cls="flex-1 py-3 text-base shadow-md" onClick={()=>toCart(p, 1, `${r?.l||''} ${s?.l||''}`, curP)}>В корзину</Btn><Btn v="sec" cls="flex-1 py-3 text-base" onClick={()=>{toCart(p, 1, `${r?.l||''} ${s?.l||''}`, curP); nav('checkout');}}>Купить сейчас</Btn></div></>}
+                                        <div className="flex gap-3"><Btn v="out" cls="flex-1 text-sm" onClick={()=>setModal({t:'1click', p})}>Купить в 1 клик</Btn><Btn v="ghost" cls="flex-1 text-sm border border-transparent hover:border-neutral" onClick={()=>setModal({t:'question', p})}><i data-lucide="help-circle" className="w-4 h-4 mr-1"></i>Задать вопрос</Btn></div>
                                     </div>
 
-                                    <div className="bg-base p-4 rounded-lg text-sm mb-8"><p><i data-lucide="shield" className="w-4 h-4 inline mr-2"></i> Гарантия: Официальная 1-2 года</p><p className="mt-2"><i data-lucide="truck" className="w-4 h-4 inline mr-2"></i> Доставка: СДЭК, Казпочта. <button onClick={()=>nav('info')} className="text-accent hover:underline">Подробнее</button></p></div>
+                                    {/* Скрин 4.3: Доставка/оплата/гарантия */}
+                                    <div className="bg-base p-4 rounded-lg text-sm mb-8 space-y-2">
+                                        <p><i data-lucide="shield" className="w-4 h-4 inline mr-2 text-graytext"></i> <b>Гарантия:</b> 12 месяцев. <button onClick={()=>nav('info')} className="text-accent hover:underline">Условия возврата</button></p>
+                                        <p><i data-lucide="truck" className="w-4 h-4 inline mr-2 text-graytext"></i> <b>Доставка:</b> Курьер, СДЭК, Самовывоз.</p>
+                                    </div>
 
-                                    {p.desc && <div className="space-y-3 text-sm mb-8"><h3 className="font-bold text-lg">Описание</h3><p><strong>Для кого:</strong> {p.desc.forWhom}</p><p><strong>Плюсы:</strong> {p.desc.pros}</p><p><strong>Комплект:</strong> {p.desc.box}</p></div>}
-                                    <h3 className="font-bold mb-4 text-lg">Характеристики</h3><table className="w-full text-sm"><tbody>{Object.entries(p.specs||{}).map(([k,v]) => <tr key={k} className="border-b border-neutral last:border-0"><td className="py-2 text-graytext w-1/3">{k}</td><td className="py-2 font-medium">{v}</td></tr>)}</tbody></table>
+                                    {/* Скрин 4.3: Описание (структурированное) */}
+                                    {p.desc && <div className="space-y-3 text-sm mb-8"><h3 className="font-bold text-lg mb-4">Описание</h3><div className="grid gap-2"><p><strong>Для кого:</strong> {p.desc.forWhom}</p><p><strong>Преимущества:</strong> {p.desc.pros}</p><p><strong>Комплектация:</strong> {p.desc.box}</p></div></div>}
+                                    
+                                    <h3 className="font-bold mb-4 text-lg">Характеристики</h3>
+                                    <table className="w-full text-sm"><tbody>{Object.entries(p.specs||{}).map(([k,v]) => <tr key={k} className="border-b border-neutral last:border-0"><td className="py-2.5 text-graytext w-1/3">{k}</td><td className="py-2.5 font-medium">{v}</td></tr>)}</tbody></table>
                                 </div>
                             </div>
                         </div>
+                        {/* Скрин 4.3: Рекомендации */}
+                        {p.cross && <div><h3 className="text-2xl font-bold mb-6">С этим покупают / Похожие товары</h3><div className="grid grid-cols-2 md:grid-cols-4 gap-4">{DB.filter(x=>p.cross.includes(x.id)).map(x=><ProdCard key={x.id} p={x}/>)}</div></div>}
                     </div>
                 );
             };
 
-            const Wishlist = () => <div className="fade-in"><TopBar /><h1 className="text-2xl font-bold mb-6">Избранное</h1>{favs.length ? <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">{favs.map(p => <ProdCard key={p.id} p={p}/>)}</div> : <p>Пусто</p>}</div>;
+            const Wishlist = () => <div className="fade-in"><TopBar /><h1 className="text-2xl font-bold mb-6">Избранное</h1>{favs.length ? <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">{favs.map(p => <ProdCard key={p.id} p={p}/>)}</div> : <div className="text-center py-20 bg-white rounded-xl"><p>Нет сохраненных товаров</p><Btn onClick={()=>nav('catalog')} cls="mt-4">Перейти в каталог</Btn></div>}</div>;
 
             const Compare = () => {
+                // Скрин 5: Сравнение (До 4 товаров, Авто-группировка, Подсветка отличий)
                 if(!comp.length) return <div className="fade-in"><TopBar/><h2 className="text-2xl font-bold mb-4">Сравнение пусто</h2></div>;
                 const keys = [...new Set(comp.flatMap(p => Object.keys(p.specs||{})))];
                 return (
                     <div className="fade-in"><TopBar />
                         <div className="bg-white p-6 rounded-xl overflow-x-auto border border-neutral">
-                            <h1 className="text-2xl font-bold mb-6">Сравнение (До 4 моделей)</h1>
-                            <table className="w-full min-w-[600px] text-sm text-left">
-                                <thead><tr><th className="w-48"></th>{comp.map(p => <th key={p.id} className="p-4 align-top"><img src={p.imgs[0]} className="w-24 h-24 object-cover mx-auto mb-3"/><div className="font-bold text-center mb-2">{p.name}</div><Btn v="out" cls="w-full text-xs" onClick={()=>setComp(c=>c.filter(x=>x.id!==p.id))}>Удалить</Btn></th>)}</tr></thead>
-                                <tbody>{keys.map(k => { const vs = comp.map(p=>p.specs?.[k]||'-'); return <tr key={k} className={`border-b border-neutral ${new Set(vs).size>1?'diff-hl':''}`}><td className="p-4 font-bold text-graytext">{k}</td>{vs.map((v,i) => <td key={i} className="p-4 text-center font-medium">{v}</td>)}</tr> })}</tbody>
+                            <h1 className="text-2xl font-bold mb-6">Сравнение товаров ({comp.length} из 4)</h1>
+                            <table className="w-full min-w-[800px] text-sm text-left">
+                                <thead><tr><th className="w-48 border-b border-neutral">Характеристика</th>{comp.map(p => <th key={p.id} className="p-4 align-top border-b border-neutral"><img src={p.imgs[0]} className="w-24 h-24 object-cover mx-auto mb-3 rounded-lg"/><div className="font-bold text-center mb-2">{p.name}</div><div className="text-center text-accent font-bold mb-3">{p.priceText || fmtP(p.price)}</div><Btn v="out" cls="w-full text-xs" onClick={()=>setComp(c=>c.filter(x=>x.id!==p.id))}>Удалить</Btn></th>)}</tr></thead>
+                                <tbody>{keys.map(k => { const vs = comp.map(p=>p.specs?.[k]||'-'); const isDiff = new Set(vs).size > 1; return <tr key={k} className={`border-b border-neutral ${isDiff ? 'diff-hl' : ''}`}><td className="p-4 font-bold text-graytext">{k}</td>{vs.map((v,i) => <td key={i} className="p-4 text-center font-medium">{v}</td>)}</tr> })}</tbody>
                             </table>
                         </div>
                     </div>
@@ -278,17 +325,39 @@
             };
 
             const Cart = () => {
+                // Скрин 6 (5.1): Изменение кол-ва, удаление, сумма, предупреждение о сроках
                 const total = cart.reduce((s,i) => s + (i.finalP * i.qty), 0);
+                const hasPreorder = cart.some(i => i.stock !== 'В наличии');
+                
                 if(!cart.length) return <div className="fade-in"><TopBar/><h2 className="text-2xl font-bold mb-4">Корзина пуста</h2></div>;
                 return (
                     <div className="max-w-4xl mx-auto fade-in"><TopBar />
                         <h1 className="text-2xl font-bold mb-6">Корзина</h1>
                         <div className="grid md:grid-cols-3 gap-8">
-                            <div className="md:col-span-2 space-y-4">{cart.map((i,x) => <div key={x} className="bg-white p-4 rounded-xl flex items-center gap-4 border border-neutral"><img src={i.imgs[0]} className="w-16 h-16 rounded" /><div className="flex-1"><b>{i.name}</b><div className="text-xs text-graytext">{i.variant}</div></div><div className="font-bold">{fmtP(i.finalP)}</div><button onClick={()=>setCart(cart.filter((_,id)=>id!==x))} className="text-red-500"><i data-lucide="trash-2"></i></button></div>)}</div>
+                            <div className="md:col-span-2 space-y-4">
+                                {cart.map((i,x) => (
+                                    <div key={x} className="bg-white p-4 rounded-xl flex items-center gap-4 border border-neutral">
+                                        <img src={i.imgs[0]} className="w-20 h-20 rounded-lg object-cover" />
+                                        <div className="flex-1">
+                                            <h4 className="font-bold text-sm md:text-base">{i.name}</h4>
+                                            <div className="text-xs text-graytext mt-1">{i.variant}</div>
+                                            {i.stock!=='В наличии' && <div className="text-[10px] text-orange-500 mt-1">{i.deliveryText}</div>}
+                                        </div>
+                                        <div className="flex items-center gap-2 border border-neutral rounded-lg px-2 py-1">
+                                            <button onClick={()=>setCart(c=>c.map((item,idx)=>idx===x?{...item, qty: Math.max(1, item.qty-1)}:item))} className="px-2 font-bold">-</button>
+                                            <span className="text-sm w-4 text-center">{i.qty}</span>
+                                            <button onClick={()=>setCart(c=>c.map((item,idx)=>idx===x?{...item, qty: item.qty+1}:item))} className="px-2 font-bold">+</button>
+                                        </div>
+                                        <div className="font-bold whitespace-nowrap w-24 text-right">{fmtP(i.finalP * i.qty)}</div>
+                                        <button onClick={()=>setCart(cart.filter((_,id)=>id!==x))} className="text-graytext hover:text-red-500 p-2"><i data-lucide="trash-2"></i></button>
+                                    </div>
+                                ))}
+                            </div>
                             <div className="bg-white p-6 rounded-xl border border-neutral h-fit">
                                 <h3 className="font-bold text-lg mb-4">Итого</h3>
-                                {cart.some(i=>i.stock!=='В наличии') && <p className="bg-orange-50 p-2 rounded text-xs text-orange-800 mb-4">В заказе предзаказ (~8 дней).</p>}
-                                <div className="flex justify-between font-bold text-xl mb-6 pt-4 border-t"><span>К оплате</span> <span className="text-brand">{fmtP(total)}</span></div>
+                                <div className="flex justify-between text-sm mb-4"><span className="text-graytext">Товары ({cart.reduce((a,c)=>a+c.qty,0)} шт)</span><span>{fmtP(total)}</span></div>
+                                {hasPreorder && <p className="bg-orange-50 p-3 rounded-lg text-xs text-orange-800 mb-4 flex gap-2 items-start"><i data-lucide="alert-circle" className="w-4 h-4 shrink-0"></i> Внимание: В заказе есть товары "под заказ". Базовый срок поставки ~8 дней.</p>}
+                                <div className="flex justify-between font-bold text-xl mb-6 pt-4 border-t border-neutral"><span>К оплате</span> <span className="text-brand">{fmtP(total)}</span></div>
                                 <Btn cls="w-full py-3" onClick={()=>nav('checkout')}>Оформление заказа</Btn>
                             </div>
                         </div>
@@ -297,32 +366,72 @@
             };
 
             const Checkout = () => {
+                // Скрин 6 (5.2): Checkout. Минимальный набор, B2B режим
                 const [b2b, setB2b] = useState(false);
                 return (
                     <div className="max-w-3xl mx-auto fade-in"><TopBar />
                         <div className="bg-white p-8 rounded-xl border border-neutral">
                             <h1 className="text-2xl font-bold mb-6">Оформление заказа</h1>
-                            <label className="flex items-center gap-3 mb-6 p-4 border rounded-lg bg-base"><input type="checkbox" checked={b2b} onChange={e=>setB2b(e.target.checked)} className="w-5 h-5 accent-accent" /> <b>Юр. лицо (B2B)</b></label>
-                            <form className="space-y-5" onSubmit={e=>{e.preventDefault(); alert('Оформлено!'); setCart([]); nav('home');}}>
+                            
+                            {/* Чек-бокс Юр. Лицо */}
+                            <label className="flex items-center gap-3 mb-8 p-4 border border-neutral rounded-lg bg-base cursor-pointer hover:border-accent transition-colors"><input type="checkbox" checked={b2b} onChange={e=>setB2b(e.target.checked)} className="w-5 h-5 accent-accent" /> <span className="font-bold text-brand">Покупка на юридическое лицо (B2B)</span></label>
+                            
+                            <form className="space-y-6" onSubmit={e=>{e.preventDefault(); alert('Заказ успешно оформлен! Статус: Новый'); setCart([]); nav('home');}}>
                                 <div className="grid md:grid-cols-2 gap-5">
-                                    {b2b ? <><input required placeholder="Компания" className="p-3 border rounded focus:border-accent outline-none"/><input required placeholder="БИН/ИНН" className="p-3 border rounded focus:border-accent outline-none"/><div className="md:col-span-2 p-4 border-2 border-dashed rounded text-center text-sm">Прикрепить реквизиты <input type="file" className="block mx-auto mt-2"/></div></> : <input required placeholder="ФИО" className="p-3 border rounded focus:border-accent outline-none"/>}
-                                    <input required placeholder="Телефон" className="p-3 border rounded focus:border-accent outline-none"/>
+                                    {b2b ? (
+                                        <>
+                                            <div><label className="block text-xs font-bold mb-1 text-graytext uppercase">Название компании *</label><input required className="w-full p-3 border border-neutral rounded-lg focus:border-accent outline-none"/></div>
+                                            <div><label className="block text-xs font-bold mb-1 text-graytext uppercase">БИН/ИНН *</label><input required className="w-full p-3 border border-neutral rounded-lg focus:border-accent outline-none"/></div>
+                                            <div><label className="block text-xs font-bold mb-1 text-graytext uppercase">Юридический адрес *</label><input required className="w-full p-3 border border-neutral rounded-lg focus:border-accent outline-none"/></div>
+                                            <div><label className="block text-xs font-bold mb-1 text-graytext uppercase">Email для счета *</label><input required type="email" className="w-full p-3 border border-neutral rounded-lg focus:border-accent outline-none"/></div>
+                                            <div className="md:col-span-2"><label className="block text-xs font-bold mb-1 text-graytext uppercase">Контактное лицо *</label><input required className="w-full p-3 border border-neutral rounded-lg focus:border-accent outline-none"/></div>
+                                            <div className="md:col-span-2 p-6 border-2 border-dashed border-neutral rounded-lg bg-base text-center"><i data-lucide="file-up" className="mx-auto text-graytext mb-2 w-8 h-8"></i><span className="text-sm font-bold block mb-2">Прикрепить реквизиты (Опционально)</span><input type="file" className="text-sm block mx-auto"/></div>
+                                        </>
+                                    ) : (
+                                        <div className="md:col-span-2"><label className="block text-xs font-bold mb-1 text-graytext uppercase">ФИО *</label><input required placeholder="Иванов Иван Иванович" className="w-full p-3 border border-neutral rounded-lg focus:border-accent outline-none"/></div>
+                                    )}
+                                    
+                                    {/* Общие поля: Телефон, Город, Адрес */}
+                                    <div><label className="block text-xs font-bold mb-1 text-graytext uppercase">Телефон *</label><input required type="tel" placeholder="+7" className="w-full p-3 border border-neutral rounded-lg focus:border-accent outline-none"/></div>
+                                    <div><label className="block text-xs font-bold mb-1 text-graytext uppercase">Город *</label><input required className="w-full p-3 border border-neutral rounded-lg focus:border-accent outline-none"/></div>
+                                    <div className="md:col-span-2"><label className="block text-xs font-bold mb-1 text-graytext uppercase">Адрес доставки *</label><input required placeholder="Улица, дом, квартира" className="w-full p-3 border border-neutral rounded-lg focus:border-accent outline-none"/></div>
                                 </div>
-                                <select className="w-full p-3 border rounded"><option>Курьер</option><option>СДЭК</option><option>Самовывоз</option></select>
-                                <select className="w-full p-3 border rounded">{b2b ? <option>Безналичный расчет (Счет)</option> : <><option>Kaspi</option><option>Карта</option></>}</select>
-                                <Btn cls="w-full py-4 text-lg">Подтвердить заказ</Btn>
+                                
+                                <div className="grid md:grid-cols-2 gap-5 pt-4 border-t border-neutral">
+                                    <div><label className="block text-xs font-bold mb-2 text-graytext uppercase">Способ доставки *</label><select className="w-full p-3 border border-neutral rounded-lg bg-white outline-none focus:border-accent"><option>Курьер (до двери)</option><option>СДЭК</option><option>Казпочта</option><option>Самовывоз (Алматы)</option></select></div>
+                                    <div><label className="block text-xs font-bold mb-2 text-graytext uppercase">Способ оплаты *</label><select className="w-full p-3 border border-neutral rounded-lg bg-white outline-none focus:border-accent">{b2b ? <option>Безналичный расчет (Счет на оплату)</option> : <><option>Kaspi / QR</option><option>Оплата картой онлайн</option></>}</select></div>
+                                </div>
+
+                                {/* Комментарий (Опционально) */}
+                                <div><label className="block text-xs font-bold mb-1 text-graytext uppercase">Комментарий к заказу</label><textarea rows="3" className="w-full p-3 border border-neutral rounded-lg focus:border-accent outline-none resize-none"></textarea></div>
+
+                                <Btn cls="w-full py-4 text-lg mt-4 shadow-lg shadow-accent/20">Подтвердить заказ</Btn>
                             </form>
                         </div>
                     </div>
                 );
             };
 
+            const B2BPage = () => (
+                <div className="fade-in max-w-4xl mx-auto"><TopBar />
+                    <div className="bg-brand text-white rounded-2xl p-10 mb-8 flex flex-col md:flex-row items-center gap-8">
+                        <div className="flex-1"><h1 className="text-3xl font-bold mb-4 uppercase">Отдел B2B продаж</h1><p className="text-graytext mb-6">Оснащаем клиники, салоны и офисы под ключ. Полный пакет документов, регистрационные удостоверения, ЭСФ.</p><Btn cls="px-6" onClick={()=>setModal({t:'quote'})}>Запросить коммерческое предложение</Btn></div>
+                        <i data-lucide="building-2" className="w-32 h-32 text-graytext/20"></i>
+                    </div>
+                    <div className="grid md:grid-cols-3 gap-6">
+                        <div className="bg-white p-6 rounded-xl border border-neutral"><i data-lucide="file-check-2" className="text-accent w-8 h-8 mb-4"></i><h3 className="font-bold mb-2">Белые документы</h3><p className="text-sm text-graytext">Заключаем договор. Предоставляем накладные, акты, сертификаты соответствия.</p></div>
+                        <div className="bg-white p-6 rounded-xl border border-neutral"><i data-lucide="percent" className="text-accent w-8 h-8 mb-4"></i><h3 className="font-bold mb-2">Оптовые цены</h3><p className="text-sm text-graytext">Специальные условия и скидки при закупке партии оборудования от 3-х единиц.</p></div>
+                        <div className="bg-white p-6 rounded-xl border border-neutral"><i data-lucide="truck" className="text-accent w-8 h-8 mb-4"></i><h3 className="font-bold mb-2">Логистика</h3><p className="text-sm text-graytext">Берем на себя доставку крупногабаритного мед. оборудования по всему Казахстану.</p></div>
+                    </div>
+                </div>
+            );
+
             const Info = () => (
-                <div className="fade-in max-w-3xl mx-auto"><TopBar /><h1 className="text-3xl font-bold mb-8">Информация</h1>
-                    <div className="space-y-6">
-                        <div className="bg-white p-6 rounded-xl border"><h2 className="text-xl font-bold mb-2">Доставка и Оплата</h2><p className="text-sm text-graytext">Курьер, СДЭК, Казпочта. Оплата Kaspi, картой, безнал.</p></div>
-                        <div className="bg-white p-6 rounded-xl border"><h2 className="text-xl font-bold mb-2">Юр. лицам (B2B)</h2><p className="text-sm text-graytext">Полный пакет документов (ЭСФ, накладные).</p></div>
-                        <div className="bg-white p-6 rounded-xl border"><h2 className="text-xl font-bold mb-2">Политика конфиденциальности</h2><p className="text-sm text-graytext">Мы используем cookie и защищаем ваши данные по законам РК.</p></div>
+                <div className="fade-in max-w-4xl mx-auto"><TopBar /><h1 className="text-3xl font-bold mb-8">Правовая информация и сервис</h1>
+                    <div className="grid md:grid-cols-2 gap-6">
+                        <div className="bg-white p-6 rounded-xl border border-neutral hover:border-accent transition-colors"><h2 className="text-xl font-bold mb-2"><i data-lucide="truck" className="inline mr-2 text-accent"></i> Доставка и Оплата</h2><p className="text-sm text-graytext">Отправка в день заказа. Сотрудничаем со СДЭК и Казпочтой. Оплата картами Visa/MC, Kaspi QR.</p></div>
+                        <div className="bg-white p-6 rounded-xl border border-neutral hover:border-accent transition-colors"><h2 className="text-xl font-bold mb-2"><i data-lucide="shield-check" className="inline mr-2 text-accent"></i> Гарантия и возврат</h2><p className="text-sm text-graytext">Гарантия на всю технику от 1 года. Возврат товара надлежащего качества в течение 14 дней по закону РК.</p></div>
+                        <div className="bg-white p-6 rounded-xl border border-neutral hover:border-accent transition-colors md:col-span-2"><h2 className="text-xl font-bold mb-2"><i data-lucide="lock" className="inline mr-2 text-accent"></i> Политика конфиденциальности и Cookie</h2><p className="text-sm text-graytext">Мы используем файлы cookie. Ваши личные данные (ФИО, телефоны) надежно защищены и не передаются 3-м лицам. Согласие на обработку данных принимается автоматически при оформлении заказа.</p></div>
                     </div>
                 </div>
             );
@@ -331,13 +440,22 @@
                 <div className="min-h-screen flex flex-col font-sans pb-20">
                     <Header />
                     <main className="flex-1 max-w-7xl mx-auto w-full p-4 py-8">
-                        {view==='home'&&<Home/>}{view==='catalog'&&<Catalog/>}{view==='pdp'&&<PDP/>}{view==='compare'&&<Compare/>}{view==='wishlist'&&<Wishlist/>}{view==='cart'&&<Cart/>}{view==='checkout'&&<Checkout/>}{view==='info'&&<Info/>}
+                        {view==='home'&&<Home/>}{view==='catalog'&&<Catalog/>}{view==='pdp'&&<PDP/>}{view==='compare'&&<Compare/>}{view==='wishlist'&&<Wishlist/>}{view==='cart'&&<Cart/>}{view==='checkout'&&<Checkout/>}{view==='info'&&<Info/>}{view==='b2b'&&<B2BPage/>}
                     </main>
-                    <footer className="bg-[#070D0E] text-graytext py-10 mt-auto"><div className="max-w-7xl mx-auto px-4 text-center text-sm">© 2024 JOHNGALTAZ</div></footer>
+                    <footer className="bg-[#070D0E] text-graytext py-12 mt-auto border-t-2 border-accent">
+                        <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-4 gap-8">
+                            <div className="md:col-span-2"><h3 className="text-white font-bold text-xl mb-4 tracking-widest uppercase">JOHNGALTAZ</h3><p className="text-sm mb-4 max-w-sm">Официальный магазин профессионального оборудования и топовых игровых решений в Казахстане.</p></div>
+                            <div><h4 className="text-white font-bold mb-4">Навигация</h4><ul className="space-y-2 text-sm"><li><button onClick={()=>{setCatF('Все'); nav('catalog');}} className="hover:text-accent">Каталог товаров</button></li><li><button onClick={()=>nav('b2b')} className="hover:text-accent">B2B отдел (Юр. лица)</button></li><li><button onClick={()=>nav('info')} className="hover:text-accent">Доставка и оплата</button></li></ul></div>
+                            <div><h4 className="text-white font-bold mb-4">Документы</h4><ul className="space-y-2 text-sm"><li><button onClick={()=>nav('info')} className="hover:text-accent">Политика конфиденциальности</button></li><li><button onClick={()=>nav('info')} className="hover:text-accent">Пользовательское соглашение</button></li><li><button onClick={()=>nav('info')} className="hover:text-accent">Гарантия и возврат</button></li></ul></div>
+                        </div>
+                        <div className="text-center text-sm mt-12 pt-6 border-t border-graytext/20">© 2024 JOHNGALTAZ. Все права защищены.</div>
+                    </footer>
                     
-                    {/* Modals & Leads */}
-                    <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-50"><button className="bg-[#27A7E7] text-white p-4 rounded-full shadow-lg hover:scale-110"><i data-lucide="send"></i></button><button className="bg-[#25D366] text-white p-4 rounded-full shadow-lg hover:scale-110"><i data-lucide="message-circle"></i></button></div>
-                    {modal && <div className="fixed inset-0 bg-brand/80 flex items-center justify-center p-4 z-50"><div className="bg-white p-8 rounded-xl w-full max-w-md relative"><button onClick={()=>setModal(null)} className="absolute top-4 right-4"><i data-lucide="x"></i></button><h2 className="text-2xl font-bold mb-4">{modal.t==='quote'?'Запрос КП':modal.t==='question'?'Задать вопрос':'Оформление'}</h2><input placeholder="Имя / Компания" className="w-full p-3 border rounded mb-4"/><input placeholder="Телефон" className="w-full p-3 border rounded mb-6"/><Btn cls="w-full py-3" onClick={()=>{alert('Отправлено');setModal(null)}}>Отправить</Btn></div></div>}
+                    {/* Плавающие Лиды */}
+                    <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-50"><button className="bg-[#27A7E7] text-white p-4 rounded-full shadow-xl hover:scale-110 transition-transform"><i data-lucide="send"></i></button><button className="bg-[#25D366] text-white p-4 rounded-full shadow-xl hover:scale-110 transition-transform"><i data-lucide="message-circle"></i></button></div>
+                    
+                    {/* Модальные окна (Запрос КП, 1 Клик, Вопрос) */}
+                    {modal && <div className="fixed inset-0 bg-brand/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 fade-in"><div className="bg-white p-8 rounded-xl w-full max-w-md relative shadow-2xl border-t-4 border-accent"><button onClick={()=>setModal(null)} className="absolute top-4 right-4 text-graytext hover:text-brand"><i data-lucide="x"></i></button><h2 className="text-2xl font-bold mb-2">{modal.t==='quote'?'Запрос КП (B2B)':modal.t==='question'?'Задать вопрос менеджеру':modal.t==='1click'?'Покупка в 1 клик':'Сложный подбор'}</h2>{modal.p && <p className="text-sm text-graytext mb-6">Товар: <span className="font-bold text-brand">{modal.p.name}</span></p>}<input placeholder={modal.t==='quote'?"Компания / ИНН":"Ваше Имя"} className="w-full p-3 border border-neutral rounded-lg mb-4 focus:border-accent outline-none" /><input placeholder="Ваш телефон" type="tel" className="w-full p-3 border border-neutral rounded-lg mb-6 focus:border-accent outline-none" /><Btn cls="w-full py-4 text-lg shadow-lg shadow-accent/30" onClick={()=>{alert('Ваша заявка успешно отправлена! Менеджер свяжется с вами.');setModal(null)}}>Отправить заявку</Btn></div></div>}
                 </div>
             );
         };
